@@ -5,7 +5,7 @@
 *   CPU:Core i5 7400
 *   OS:Ubuntu 22.04
   
-**導入モジュール**
+**導入ライブラリ**
 ```terminal:module
 pip install pygame
 pip install cython
