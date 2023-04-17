@@ -1,0 +1,571 @@
+#:import Line kivy.graphics.Line
+#:import Ellipse kivy.graphics.Ellipse
+#:import Triangle kivy.graphics.Triangle
+
+<RootScreen>:
+    canvas:
+        Color:
+            rgba:0,.3,0,1
+        Rectangle:
+
+            #source: "image/a.jpg" #いい感じの画像があったら変更（背景変更）
+            pos: self.pos
+            size: self.size
+
+    id:target_line
+<BattleScreen>:
+    canvas:
+        Color:
+            rgba:0,.3,0,1
+        Rectangle:
+
+            #source: "image/a.jpg" #いい感じの画像があったら変更（背景変更）
+            pos: self.pos
+            size: self.size
+
+    id:target_line
+
+<MainTopWidget>: ####parent
+    id:main_root
+    menu_button:menu_button
+    top_label:top_label
+    text_label:text_label
+    top_menu:top_menu
+
+    cols:1
+    #################################children[0]
+    BoxLayout:
+
+        canvas.before:
+            Color:
+                rgb: .6, .6, .3
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        canvas.after:
+            Color:
+                rgb: .75, .75, .4
+            Line:
+                rectangle: self.x,self.y,self.width,self.height
+                width:1.3
+        orientation: 'horizontal'
+        size_hint:1,.08
+        padding:2
+        spacing:2
+
+        MenuButton:
+            spacing:1
+            id:top_menu
+            text:'トップメニュー'
+
+            #ボタンサイズ
+            size_hint: .18, 1
+
+            #押下したときの処理
+            on_release:root.top_menu_btn()
+
+
+        Cstmlbl_fs20:#画面TOPのテキストスペース
+            id:top_label
+            text:"ゲーム　スタート"
+            size_hint: .64, 1
+
+
+        MenuButton:
+            spacing:1
+            id:menu_button
+            text:'メニュー'
+
+
+            #ボタンサイズ
+            size_hint: .18, 1
+
+            #押下したときの処理
+            on_release:root.menu_btn()
+    #######################################children[1]
+    BoxLayout:
+        id:action_list
+        orientation:'vertical'
+
+        size_hint:1,.08
+        l:4
+
+        canvas.before:
+            Color:
+                rgb: .28, .12, .04
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgb: .4, .25, .12
+            Line:
+                points: self.x,self.y+self.height-self.l,self.width,self.y+self.height-self.l
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6,self.width,self.y+self.height-self.l-6
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6-6,self.width,self.y+self.height-self.l-6-6
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6-6-6,self.width,self.y+self.height-self.l-6-6-6
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6-6-6-6,self.width,self.y+self.height-self.l-6-6-6-6
+                width:2
+
+        canvas.after:
+            Color:
+                rgb: .75, .75, .4
+            Line:
+                points: self.x,self.y,self.width,self.y
+                width:1.3
+            Color:
+                rgb: .55, .55, .25
+            Line:
+                points: self.x,self.y-1,self.width,self.y-1
+                width:1.3
+
+        Cstmlbl_fs15:
+            size_hint:1,.4
+            text:""
+        OrderSpace:
+    ########################################children[3]
+    #戦闘の流れ
+        #ターン開始
+        #↓
+        #アクション選択　x3
+        #↓
+        #敵アクション選択 x3
+        #↓
+        #アクション開始 x6
+        #↓
+        #ターン終了
+
+    BattleField:###[0]
+        id:battle_field
+
+
+        #ここから行動を呼び出す
+        act_1:""
+        act_2:""
+        act_3:""
+        act_4:""
+        act_5:""
+        act_6:""
+
+        orientation: 'horizontal' if root.height >= root.width else 'vertical'
+
+        heroes_filed:heroes_filed
+        enemies_field:enemies_field
+
+        HeroesField:
+            orientation: 'vertical' if root.height >= root.width else 'horizontal'
+            id: heroes_filed
+
+        BoxLayout:
+            id:party_status
+            size_hint:1,.72
+
+        EnemiesField:
+            id: enemies_field
+            orientation: 'vertical' if root.height >= root.width else 'horizontal'
+
+            ######################################children[4]
+    Cstmlbl_fs15:
+        canvas.before:
+            Color:
+                rgb: .6, .6, .3
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        canvas.after:
+            Color:
+                rgb:.55, .55, .25
+            Line:
+                points: self.x,self.y+self.height,self.width,self.y+self.height
+                width:1.3
+            Color:
+                rgb: .75, .75, .4
+            Line:
+                points: self.x,self.y+self.height+1,self.width,self.y+self.height+1
+                width:1.3
+
+        id:text_label
+        text:"初期テキスト"
+        size_hint: 1, .08
+
+######################################################
+
+<MainWidget,TestWidget>:
+    id:main_widget
+    target_type:""
+    padding:10
+    spacing:10
+    cols:3
+    size_hint :1,.16
+    a_btn:a_btn
+    b_btn:b_btn
+    c_btn:c_btn
+
+    MenuButton:
+        size_hint :1,.8
+        id:a_btn
+        text:'A'
+        is_info:''
+        on_release:
+            if root.art_dict != "":root.pushed_btn(root.art_dict[0]["name"]);root.target_type = root.art_dict[0]["target_type"]
+            else: root.pushed_btn(self.text)
+    MenuButton:
+        size_hint :1,.8
+        id:b_btn
+        text:'B'
+        is_info:''
+        on_release:
+            if root.art_dict != "":root.pushed_btn(root.art_dict[1]["name"]);root.target_type = root.art_dict[1]["target_type"]
+            else: root.pushed_btn(self.text)
+
+    MenuButton:
+        size_hint :1,.8
+        id:c_btn
+        text:'C'
+        is_info:''
+        on_release:
+            if root.art_dict != "":root.pushed_btn(root.art_dict[2]["name"]);root.target_type = root.art_dict[2]["target_type"]
+            else: root.pushed_btn(self.text)
+
+
+########################################################
+
+#これはスクリーン化する予定
+<OpeningWidget>:
+    orientation: 'vertical'
+    size: root.size
+
+    canvas.before:
+        Color:
+            rgb:[1,1,1]
+<BattleField@BoxLayout>:
+    id:battle_field
+
+<HeroCard@ButtonBehavior+BoxLayout>:
+    particle:particle
+    hero_card:hero_card
+    id:hero_card
+    name:name
+    hpbar:hpbar
+    selected_arts:selected_arts
+
+    is_active:"standby"
+    is_arts:"standby"
+    atk:1
+    spd:1
+
+
+    orientation:'vertical'
+    source:"image/txtr.png"
+
+    always_release: True
+
+    is_status:0
+    on_press:
+        #root.test_hp_damage(10)
+        root.arts_on_display()
+
+        root.parent.parent.children[1].strt_x = self.center_x
+        root.parent.parent.children[1].strt_y = self.center_y
+
+    canvas.before:
+
+        Color:
+            rgba: (.2,.2,.5,.85) if self.state == 'normal' else (.5,.5,.8,.85)
+
+        Rectangle:
+            size:self.width+10,self.center_y-self.y
+            pos:self.x,self.center_y
+
+    Cstmlbl_fs15:
+        bs_fntsz:26
+        id:name
+        size_hint:1,.2
+
+    StatusBar:
+        id:hpbar
+        size_hint:1,.12
+        canvas.before:
+            Color:
+                rgb:.3,.7,.3
+            Rectangle:#緑ゲージ
+                pos:self.pos
+                # 参考:px * (最大HP - 現在のHP) / 最大HP
+                size:self.width-self.width*(self.max - self.now)/self.max, self.height
+
+    Cstmlbl_fs15:
+        size_hint:1,.2
+        id:selected_arts
+        text:'(技名スペース)'
+    Label:
+        id:particle
+        part_c:0
+        part_x:0
+        part_y:0
+        size_hint:1,.5
+        canvas.after:
+            Color:
+                rgb:1,1,1
+            Rectangle
+                size:5,5
+                pos:self.center_x+self.part_x,self.center_y+self.part_y
+
+
+<StatusBar@Cstmlbl_fs15>:
+    max:250
+    now:250
+    canvas.before:
+        #オーバーゲージ(緑)は実装時に記述しないとエラーになる
+        Color:
+            rgb:.14,.14,.14
+        Rectangle:#赤ゲージ
+            pos:self.pos
+            size:self.width,self.height
+    canvas.after:
+        Color:
+            rgb:.4,.5,.3
+        Line:
+            rectangle: self.x+1.3,self.y,self.width,self.height
+            width:1.3
+
+
+<EnemyField>:
+    enemy_field:enemy_field
+    id:enemy_field
+
+    enemy_name:enemy_name
+    enemy_status:enemy_status
+
+    _:1
+
+    strt_x: 0
+    strt_y: 0
+
+    goal_x: self.center_x
+    goal_y: self.center_y
+
+    tri_x: 30
+    tri_y: self.tri_x /2.38
+    cir_size_x: 14
+    cir_size_y: self.cir_size_x
+
+
+    always_release:True
+    orientation:'horizontal'
+    on_release:
+        if root.parent.parent.parent.children[0].target_type == "enemy":root.enemy_select();root.parent.parent.canvas.add(Line(points=[self.strt_x, self.strt_y, self.goal_x-self.tri_x,self.strt_y],width=12))
+        #root.parent.parent.canvas.add(Triangle(points=[self.goal_x - self.tri_x, self.goal_y-self.tri_y, self.goal_x, self.goal_y,self.goal_x-self.tri_x,self.goal_y+self.tri_y]))
+
+
+    canvas.before:
+        Color:
+            rgba: (.5,.2,.2,.85)if self.state == 'normal' else (.8,.5,.5,.85)
+        Ellipse:
+            pos:self.pos
+            size:self.size
+
+
+    BoxLayout:
+        orientation:'vertical'
+
+        Cstmlbl_fs20:
+            size_hint:1,.15
+            id:enemy_name
+
+        Cstmlbl_fs15:
+            size_hint:1,.85
+            id:enemy_status
+
+
+<HeroesField,EnemiesField>:
+    orientation:'vertical'
+    spacing:10
+    padding:10
+
+<MenuScreen>:
+    canvas.before:
+        Color:
+            rgb:0,0,.3
+        Rectangle:
+            #いい感じの画像があったら下記に挿入（背景変更）
+            #source: "image/a.jpg"
+            pos: self.pos
+            size: self.size
+    size_hint:1,1
+    BoxLayout:
+        orientation:'vertical'
+        padding:10
+        spacing:10
+        Widget:
+            size_hint:1,.4
+
+        MenuButton:
+            id:'root_screen_return'
+            on_release:
+                root.main_slide()
+            Cstmlbl_fs15:
+                id:'back'
+                text:"ゲームに戻る"
+
+        MenuButton:
+            on_release:
+
+            Cstmlbl_fs15:
+                id:'back'
+                text:"設定画面(未実装)"
+
+        MenuButton:
+            id:'menu'
+            on_release:
+
+
+            Cstmlbl_fs15:
+                id:'back'
+                text:"(未実装)"
+
+        MenuButton:
+            id:'menu_btn'
+            on_release:
+
+
+            Cstmlbl_fs15:
+                id:'back'
+                text:"(未実装)"
+
+        MenuButton:
+            on_release:
+                self.clr = self.bs_clr
+
+
+            BoxLayout:
+                orientation:'horizontal'
+                Cstmlbl_fs15:
+                    text:"ButtonBehavior\n in BoxLayout \n A"
+                Cstmlbl_fs15:
+                    text:"ButtonBehavior\n in BoxLayout \n B"
+        Widget:
+            size_hint:1,.4
+
+<MenuButton@CustomBB+BoxLayout+Cstmlbl_fs15>:
+    canvas.before:
+        Color:
+            rgb: (0,.3,.3) if self.state == 'normal' else (1,.3,.3)
+        Rectangle:
+            pos:self.pos
+            size:self.size
+            #texture: self.texture
+        Color:
+            rgb: (0,.2,.2) if self.state == 'normal' else (.5,.1,.1)
+        Line:
+            rectangle: self.x+2,self.y+2,self.width-2,self.height-2
+            width:2 if self.width >250 else 1
+        Color:
+            rgb: (0,.1,.1) if self.state == 'normal' else (.4,.05,.05)
+        Line:
+            rectangle: self.x,self.y,self.width,self.height
+            width:2 if self.width >250 else 1
+<CustomBB@ButtonBehavior>
+    always_release:True
+
+
+
+<Cstmlbl_fs20@Label>:
+    markup:True
+    bs_fntsz: 20
+    lmt_fntsz: self.bs_fntsz*5
+    font_size: self.bs_fntsz if self.bs_fntsz * self.width / self.lmt_fntsz >= self.bs_fntsz else self.bs_fntsz * self.width /self.lmt_fntsz
+
+<Cstmlbl_fs15@Label>:
+    color:(.97, .8, .3)
+    markup:True
+    outline_width : 2
+    outline_color :(.6, .4, .2,.6)
+    bs_fntsz: 15
+    lmt_fntsz: self.bs_fntsz*6
+    font_size: self.bs_fntsz if self.bs_fntsz * self.width / self.lmt_fntsz >= self.bs_fntsz else self.bs_fntsz * self.width /self.lmt_fntsz
+
+
+<Cstmlbl_fs@Label>:
+    markup:True
+    bs_fntsz: 15
+    lmt_fntsz: self.bs_fntsz*2
+    font_size: self.bs_fntsz if self.bs_fntsz * self.width / self.lmt_fntsz >= self.bs_fntsz else self.bs_fntsz * self.width /self.lmt_fntsz
+<Cstmlbl_fs12@Label>:
+    markup:True
+    bs_fntsz: 12
+    lmt_fntsz: self.bs_fntsz * 10
+    font_size: self.bs_fntsz if self.bs_fntsz * self.width / self.lmt_fntsz >= self.bs_fntsz else self.bs_fntsz * self.width /self.lmt_fntsz
+
+<OrderSpace@BoxLayout>:
+    id:order_space
+    orientation:'horizontal'
+
+<OSHero>:
+    chara_name:chara_name
+    canvas.before:
+        Color:
+            rgba: rgba('#333383')
+        Rectangle:
+            pos:self.pos
+            size:self.size
+        Color:
+            rgba: rgba('#AAAAAA')
+        Line:
+            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
+
+    Cstmlbl_fs15:
+        bs_fntsz:26
+        id:chara_name
+<OSEnemy>:
+    chara_name:chara_name
+    canvas.before:
+        Color:
+            rgba: rgba('#833333')
+        Rectangle:
+            pos:self.pos
+            size:self.size
+        Color:
+            rgba: rgba('#AAAAAA')
+        Line:
+            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
+
+    Cstmlbl_fs15:
+        bs_fntsz:26
+        id:chara_name
+<EmptySpace>:
+    hero_card:hero_card
+    id:hero_card
+    is_active:'empty'
+
+
+<TestAA@ButtonBehavior+Label>:
+    text:"test"
+    always_release:True
+    bs_clr:0,.3,.3,1
+    clr: 0,.3,.3,1
+    on_press:self.clr = 1,.3,.3,1
+    on_release:
+        self.clr = self.bs_clr
+    canvas.before:
+        Color:
+            rgba:self.clr
+        Rectangle:
+            pos:self.pos
+            size:self.size
+        Color:
+            rgb:0,.2,.2
+        Line:
+            rectangle: self.x+2,self.y+2,self.width-2,self.height-2
+            width:2 if self.width >250 else 1
+        Color:
+            rgb:0,.1,.1
+        Line:
+            rectangle: self.x,self.y,self.width,self.height
+            width:2 if self.width >250 else 1
