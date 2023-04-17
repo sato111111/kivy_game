@@ -10,4 +10,5 @@
 pip install docutils pygments pypiwin32 kivy.deps.sdl2 kivy.deps.glew
 ```
 **概要**
-##
+作りたいもの
+*Andoroidで動作するRPGゲーム
