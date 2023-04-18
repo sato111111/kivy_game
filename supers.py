@@ -22,8 +22,6 @@ from Battle import Battle
 import dictionaries as di
 
 
-
-
 class SuperTopLayout(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -34,11 +32,10 @@ class SuperTopLayout(GridLayout):
     def top_update_top_label(self, dt):
         self.top_label.text = self.top_lbl
 
-    def change_screen(self, screen_name:str):
+    def change_screen(self, screen_name: str):
         pa = self.parent
         pa.manager.transition = WipeTransition()
         pa.manager.current = screen_name
-
 
 
 class SuperButtonLayout(GridLayout):
@@ -69,18 +66,23 @@ class SuperButtonLayout(GridLayout):
     def text_change(self, t):
         self.se.se_play("correct.mp3")
 
+
 class MSettingScreen(Screen):
     """メニューボタンを押すとメニューが開ける。
         下記にはkvファイルに登録した関数の処理を記述"""
+
     def __init__(self, **kw):
         super().__init__(**kw)
 
     def main_slide(self):
         self.parent.transition = WipeTransition()
         self.parent.current = "main_screen"
+
+
 class BSettingScreen(Screen):
     """メニューボタンを押すとメニューが開ける。
         下記にはkvファイルに登録した関数の処理を記述"""
+
     def __init__(self, **kw):
         super().__init__(**kw)
 
@@ -118,3 +120,8 @@ class EnemiesField(BoxLayout):
 class EmptySpace(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+
+class PopupMenu(BoxLayout):
+    popup_no = ObjectProperty(None)
+    popup_yes = ObjectProperty(None)

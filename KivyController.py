@@ -136,9 +136,9 @@ class BattleTopLayout(SuperTopLayout):
         self.change_screen("b_s_s")
 
 
-class PopupMenu(BoxLayout):
-    popup_no = ObjectProperty(None)
-    popup_yes = ObjectProperty(None)
+
+
+
 
 
 class MainButtonLayout(SuperButtonLayout):
@@ -178,14 +178,14 @@ class BattleButtonLayout(SuperButtonLayout):
         global g_player
         self.max_cost = g_player.max_cost
         player_party = g_player.party
-        Clock.schedule_once(self.update_btn_welcome_test_env)
+        Clock.schedule_once(self.update_btn)
         self.en = [Ch(1), Ch(3), Ch(4)]
         self.order_of_action_list_insert = lambda: [self.parent.children[3].children[0].add_widget(chara_in_widget) for
                                                     chara_in_widget in
                                                     [OSHero(c) if c.is_hero == 1 else OSEnemy(c) for c in
                                                      sorted([c for c in player_party + self.en if c != "empty"],
                                                             reverse=True, key=attrgetter("spd"))]]
-
+        self.acted_member = ()
     def update_btn(self, dt):
         # self.parent.top_label.text = "テスト環境" + str(self.current_turn) + "ターン目"
         # self.parent.text_label.text = "テストテキスト"
@@ -410,9 +410,6 @@ class BattleField(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # 行動をここに格納し、行動時はここから呼び出す。
-        self.act_1 = "is_not_Character"
-        self.act_2 = "is_not_Character"
-        self.act_3 = "is_not_Character"
-        self.act_4 = "is_not_Character"
-        self.act_5 = "is_not_Character"
-        self.act_6 = "is_not_Character"
+        self.act_1 = None
+        self.act_2 = None
+
