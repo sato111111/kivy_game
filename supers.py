@@ -69,3 +69,52 @@ class SuperButtonLayout(GridLayout):
     def text_change(self, t):
         self.se.se_play("correct.mp3")
 
+class MSettingScreen(Screen):
+    """メニューボタンを押すとメニューが開ける。
+        下記にはkvファイルに登録した関数の処理を記述"""
+    def __init__(self, **kw):
+        super().__init__(**kw)
+
+    def main_slide(self):
+        self.parent.transition = WipeTransition()
+        self.parent.current = "main_screen"
+class BSettingScreen(Screen):
+    """メニューボタンを押すとメニューが開ける。
+        下記にはkvファイルに登録した関数の処理を記述"""
+    def __init__(self, **kw):
+        super().__init__(**kw)
+
+    def main_slide(self):
+        self.parent.transition = WipeTransition()
+        self.parent.current = "battle_screen"
+
+
+class OSHero(BoxLayout):
+    chara_name = ObjectProperty()
+
+    def __init__(self, character, **kwargs):
+        super().__init__(**kwargs)
+        self.chara_name.text = character.name_txt()
+
+
+class OSEnemy(BoxLayout):
+    chara_name = ObjectProperty()
+
+    def __init__(self, character, **kwargs):
+        super().__init__(**kwargs)
+        self.chara_name.text = character.name_txt()
+
+
+class HeroesField(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class EnemiesField(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class EmptySpace(Widget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)

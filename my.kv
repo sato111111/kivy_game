@@ -82,54 +82,6 @@
             #押下したときの処理
             on_release:root.menu_btn()
     #######################################children[1]
-    BoxLayout:
-        id:action_list
-        orientation:'vertical'
-
-        size_hint:1,.08
-        l:4
-
-        canvas.before:
-            Color:
-                rgb: .28, .12, .04
-            Rectangle:
-                pos: self.pos
-                size: self.size
-            Color:
-                rgb: .4, .25, .12
-            Line:
-                points: self.x,self.y+self.height-self.l,self.width,self.y+self.height-self.l
-                width:2
-            Line:
-                points: self.x,self.y+self.height-self.l-6,self.width,self.y+self.height-self.l-6
-                width:2
-            Line:
-                points: self.x,self.y+self.height-self.l-6-6,self.width,self.y+self.height-self.l-6-6
-                width:2
-            Line:
-                points: self.x,self.y+self.height-self.l-6-6-6,self.width,self.y+self.height-self.l-6-6-6
-                width:2
-            Line:
-                points: self.x,self.y+self.height-self.l-6-6-6-6,self.width,self.y+self.height-self.l-6-6-6-6
-                width:2
-
-        canvas.after:
-            Color:
-                rgb: .75, .75, .4
-            Line:
-                points: self.x,self.y,self.width,self.y
-                width:1.3
-            Color:
-                rgb: .55, .55, .25
-            Line:
-                points: self.x,self.y-1,self.width,self.y-1
-                width:1.3
-
-        Cstmlbl_fs15:
-            size_hint:1,.4
-            text:""
-        OrderSpace:
-    ########################################children[3]
     Label:###[0]
 
 
@@ -707,9 +659,10 @@
     Label:
         text:'逃げますか'
     BoxLayout:
+        size_hint:1,.85
         orientation: 'horizontal'
         padding:30
-
+        spacing:10
         MenuButton:
             text:'はい'
             on_release:
@@ -717,4 +670,4 @@
         MenuButton:
             text:'いいえ'
             on_release:
-                root.popup_close()
+                root.popup_no()

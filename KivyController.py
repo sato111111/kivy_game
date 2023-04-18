@@ -7,12 +7,12 @@ import numpy as np
 Config.set("graphics", "width", 700)
 Config.set("graphics", "height", 700)
 
-
 # 指定したkvファイル読み込み
 # Builder.load_file("my.kv")
 """ウィンドウ制御、レイアウト関連クラス"""
 
 global g_player
+
 
 class KiApp(App):
     def build(self):
@@ -34,18 +34,17 @@ class KiApp(App):
 
     def env_execute(self, environment):  # 手続き型凝集、スタンプ結合
 
-
         """起動時の実行環境を選択"""
         sm = ScreenManager()  # スクリーンマネージャを起動
         [
             sm.add_widget(screen) for screen in
-         (
-             BattleScreen(name="battle_screen"),
-             MainScreen(name="main_screen"),
-             BSettingScreen(name="b_s_s"),
-             MSettingScreen(name="m_s_s"),
-         )
-         ]
+            (
+                BattleScreen(name="battle_screen"),
+                MainScreen(name="main_screen"),
+                BSettingScreen(name="b_s_s"),
+                MSettingScreen(name="m_s_s"),
+            )
+        ]
 
         btl = BattleTopLayout()
         mtl = MainTopLayout()
@@ -88,8 +87,6 @@ class BattleScreen(Screen):
     pass
 
 
-
-
 class MainTopLayout(SuperTopLayout):
     def __init__(self, tplbl="", **kwargs):  # スタンプ結合
         super().__init__(**kwargs)
@@ -108,6 +105,7 @@ class MainTopLayout(SuperTopLayout):
         # setting_screen呼び出し
         self.change_screen("m_s_s")
 
+
 class BattleTopLayout(SuperTopLayout):
 
     def __init__(self, tplbl="", **kwargs):  # スタンプ結合
@@ -115,19 +113,16 @@ class BattleTopLayout(SuperTopLayout):
         self.top_label.text = tplbl if tplbl != "" else "ゲームスタート(BTL)"
 
     def top_menu_btn(self):  # メッセージ結合
-        content = PopupMenu(popup_close=self.popup_close,popup_yes=self.popup_yes)
-        self.popup = Popup(title="逃げますか？", content=content, size_hint=(0.5, 0.5))
+        content = PopupMenu(popup_no=self.popup_close, popup_yes=self.popup_run_away)
+        self.popup = Popup(title="逃げますか？", content=content, size_hint=(0.5, 0.3))
         self.popup.open()
 
-
-    def popup_yes(self):
+    def popup_run_away(self):
         self.reset()
         self.popup.dismiss()
 
     def popup_close(self):
         self.popup.dismiss()
-
-
 
     def reset(self):  # 手続き型凝集、スタンプ結合
 
@@ -135,12 +130,14 @@ class BattleTopLayout(SuperTopLayout):
         self.clear_widgets()
         self.parent.add_widget(BattleTopLayout("リセットしましたBTL"))
         self.parent.children[0].add_widget(BattleButtonLayout())
+
     def menu_btn(self):  # 機能的凝集、スタンプ結合
         # setting_screen呼び出し
         self.change_screen("b_s_s")
 
+
 class PopupMenu(BoxLayout):
-    popup_close = ObjectProperty(None)
+    popup_no = ObjectProperty(None)
     popup_yes = ObjectProperty(None)
 
 
@@ -154,7 +151,7 @@ class MainButtonLayout(SuperButtonLayout):
 
         if t == "A":
             ans = t + "ボタンを選択"
-            #self.widget_change(BattleButtonLayout())
+            # self.widget_change(BattleButtonLayout())
             self.parent.change_screen("battle_screen")
 
         elif t == "B":
@@ -419,54 +416,3 @@ class BattleField(BoxLayout):
         self.act_4 = "is_not_Character"
         self.act_5 = "is_not_Character"
         self.act_6 = "is_not_Character"
-
-
-class MSettingScreen(Screen):
-    """メニューボタンを押すとメニューが開ける。
-        下記にはkvファイルに登録した関数の処理を記述"""
-    def __init__(self, **kw):
-        super().__init__(**kw)
-
-    def main_slide(self):
-        self.parent.transition = WipeTransition()
-        self.parent.current = "main_screen"
-class BSettingScreen(Screen):
-    """メニューボタンを押すとメニューが開ける。
-        下記にはkvファイルに登録した関数の処理を記述"""
-    def __init__(self, **kw):
-        super().__init__(**kw)
-
-    def main_slide(self):
-        self.parent.transition = WipeTransition()
-        self.parent.current = "battle_screen"
-
-
-class OSHero(BoxLayout):
-    chara_name = ObjectProperty()
-
-    def __init__(self, character, **kwargs):
-        super().__init__(**kwargs)
-        self.chara_name.text = character.name_txt()
-
-
-class OSEnemy(BoxLayout):
-    chara_name = ObjectProperty()
-
-    def __init__(self, character, **kwargs):
-        super().__init__(**kwargs)
-        self.chara_name.text = character.name_txt()
-
-
-class HeroesField(BoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
-class EnemiesField(BoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
-class EmptySpace(Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
