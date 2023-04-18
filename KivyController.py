@@ -186,7 +186,7 @@ class BattleButtonLayout(SuperButtonLayout):
                                                      sorted([c for c in player_party + self.en if c != "empty"],
                                                             reverse=True, key=attrgetter("spd"))]]
 
-    def update_btn_welcome_test_env(self, dt):
+    def update_btn(self, dt):
         # self.parent.top_label.text = "テスト環境" + str(self.current_turn) + "ターン目"
         # self.parent.text_label.text = "テストテキスト"
         self.a_btn.text = "戦闘呼び出し(テスト)"
