@@ -2,7 +2,7 @@
 #:import Ellipse kivy.graphics.Ellipse
 #:import Triangle kivy.graphics.Triangle
 
-<RootScreen>:
+<MainScreen>:
     canvas:
         Color:
             rgba:0,.3,0,1
@@ -24,9 +24,142 @@
             size: self.size
 
     id:target_line
+<MainTopLayout>: ####parent
+    id:main_top_layout
+    menu_button:menu_button
+    top_label:top_label
+    text_label:text_label
+    top_menu:top_menu
 
-<MainTopWidget>: ####parent
-    id:main_root
+    cols:1
+    #################################children[0]
+    BoxLayout:
+
+        canvas.before:
+            Color:
+                rgb: .6, .6, .3
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        canvas.after:
+            Color:
+                rgb: .75, .75, .4
+            Line:
+                rectangle: self.x,self.y,self.width,self.height
+                width:1.3
+        orientation: 'horizontal'
+        size_hint:1,.08
+        padding:2
+        spacing:2
+
+        MenuButton:
+            spacing:1
+            id:top_menu
+            text:'トップメニュー'
+
+            #ボタンサイズ
+            size_hint: .18, 1
+
+            #押下したときの処理
+            on_release:root.top_menu_btn()
+
+
+        Cstmlbl_fs20:#画面TOPのテキストスペース
+            id:top_label
+            text:"ゲーム　スタート(MTL)"
+            size_hint: .64, 1
+
+
+        MenuButton:
+            spacing:1
+            id:menu_button
+            text:'メニュー'
+
+
+            #ボタンサイズ
+            size_hint: .18, 1
+
+            #押下したときの処理
+            on_release:root.menu_btn()
+    #######################################children[1]
+    BoxLayout:
+        id:action_list
+        orientation:'vertical'
+
+        size_hint:1,.08
+        l:4
+
+        canvas.before:
+            Color:
+                rgb: .28, .12, .04
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgb: .4, .25, .12
+            Line:
+                points: self.x,self.y+self.height-self.l,self.width,self.y+self.height-self.l
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6,self.width,self.y+self.height-self.l-6
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6-6,self.width,self.y+self.height-self.l-6-6
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6-6-6,self.width,self.y+self.height-self.l-6-6-6
+                width:2
+            Line:
+                points: self.x,self.y+self.height-self.l-6-6-6-6,self.width,self.y+self.height-self.l-6-6-6-6
+                width:2
+
+        canvas.after:
+            Color:
+                rgb: .75, .75, .4
+            Line:
+                points: self.x,self.y,self.width,self.y
+                width:1.3
+            Color:
+                rgb: .55, .55, .25
+            Line:
+                points: self.x,self.y-1,self.width,self.y-1
+                width:1.3
+
+        Cstmlbl_fs15:
+            size_hint:1,.4
+            text:""
+        OrderSpace:
+    ########################################children[3]
+    Label:###[0]
+
+
+
+            ######################################children[4]
+    Cstmlbl_fs15:
+        canvas.before:
+            Color:
+                rgb: .6, .6, .3
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        canvas.after:
+            Color:
+                rgb:.55, .55, .25
+            Line:
+                points: self.x,self.y+self.height,self.width,self.y+self.height
+                width:1.3
+            Color:
+                rgb: .75, .75, .4
+            Line:
+                points: self.x,self.y+self.height+1,self.width,self.y+self.height+1
+                width:1.3
+
+        id:text_label
+        text:"初期テキスト"
+        size_hint: 1, .08
+
+<BattleTopLayout>: ####parent
+    id:battle_top_layout
     menu_button:menu_button
     top_label:top_label
     text_label:text_label
@@ -197,7 +330,7 @@
 
 ######################################################
 
-<MainWidget,TestWidget>:
+<MainButtonLayout,BattleButtonLayout>:
     id:main_widget
     target_type:""
     padding:10
@@ -389,7 +522,7 @@
     spacing:10
     padding:10
 
-<MenuScreen>:
+<MSettingScreen,BSettingScreen>:
     canvas.before:
         Color:
             rgb:0,0,.3
@@ -569,3 +702,19 @@
         Line:
             rectangle: self.x,self.y,self.width,self.height
             width:2 if self.width >250 else 1
+<PopupMenu@BoxLayout>:
+    orientation: 'vertical'
+    Label:
+        text:'逃げますか'
+    BoxLayout:
+        orientation: 'horizontal'
+        padding:30
+
+        MenuButton:
+            text:'はい'
+            on_release:
+                root.popup_yes()
+        MenuButton:
+            text:'いいえ'
+            on_release:
+                root.popup_close()

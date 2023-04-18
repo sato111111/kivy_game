@@ -1,36 +1,18 @@
-from operator import attrgetter
+from kivy.uix.popup import Popup
 
-import japanize_kivy  # import するだけで機能する。
-from kivy.animation import Animation
-from kivy.app import App
-from kivy.clock import Clock
-from kivy.properties import ObjectProperty, StringProperty
-from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.label import Label
-from kivy.uix.screenmanager import Screen, ScreenManager, WipeTransition
-from kivy.core.window import Window
-from kivy.config import Config
-from kivy.uix.widget import Widget
+from supers import *
+
 import numpy as np
 
 Config.set("graphics", "width", 700)
 Config.set("graphics", "height", 700)
 
-from Player import Player as Pl
-from Character import Character as Ch
-from time import sleep
-from sounds.Sounds import Sounds as Se
-from Battle import Battle
-import dictionaries as di
 
 # 指定したkvファイル読み込み
 # Builder.load_file("my.kv")
 """ウィンドウ制御、レイアウト関連クラス"""
 
 global g_player
-
 
 class KiApp(App):
     def build(self):
@@ -48,23 +30,37 @@ class KiApp(App):
         g_player = Pl("テストプレイヤー", he)
 
         # 起動時の実行環境の切り替え 「MainWidget()」,「TestWidget()」
-        return self.env_execute(TestWidget())
+        return self.env_execute(BattleButtonLayout())
 
     def env_execute(self, environment):  # 手続き型凝集、スタンプ結合
+
+
         """起動時の実行環境を選択"""
-        sm = ScreenManager()
-        rs = RootScreen(name="root_screen")
-        mtw = MainTopWidget()
-        ms = MenuScreen(name="menu_screen")
-        bs = BattleScreen(name="battle_screen")
+        sm = ScreenManager()  # スクリーンマネージャを起動
+        [
+            sm.add_widget(screen) for screen in
+         (
+             BattleScreen(name="battle_screen"),
+             MainScreen(name="main_screen"),
+             BSettingScreen(name="b_s_s"),
+             MSettingScreen(name="m_s_s"),
+         )
+         ]
 
-        environment_execute = sm  # スクリーンマネージャを起動
-        environment_execute.add_widget(rs)  # SMにスクリーンを紐付け
-        environment_execute.children[0].add_widget(mtw)  # スクリーンに画面上部のウィジェットを紐付け
-        environment_execute.children[0].children[0].add_widget(environment)  # 上部のウィジェットに下部のウィジェットを紐付け
-        environment_execute.add_widget(ms)
+        btl = BattleTopLayout()
+        mtl = MainTopLayout()
 
-        return environment_execute
+        bl = BattleButtonLayout()
+        ml = MainButtonLayout()
+
+        sm.children[0].add_widget(btl)  # スクリーンに画面上部のウィジェットを紐付け
+        sm.children[0].children[0].add_widget(bl)
+
+        sm.current = "main_screen"
+        sm.children[0].add_widget(mtl)  # スクリーンに画面上部のウィジェットを紐付け
+        sm.children[0].children[0].add_widget(ml)  # 上部のウィジェットに下部のウィジェットを紐付け"""
+
+        return sm
 
     def on_pause(self):
         """ ポーズ時のイベント """
@@ -84,7 +80,7 @@ class KiApp(App):
         return
 
 
-class RootScreen(Screen):
+class MainScreen(Screen):
     pass
 
 
@@ -92,62 +88,63 @@ class BattleScreen(Screen):
     pass
 
 
-class MainTopWidget(GridLayout):
 
+
+class MainTopLayout(SuperTopLayout):
     def __init__(self, tplbl="", **kwargs):  # スタンプ結合
         super().__init__(**kwargs)
-        self.top_label.text = tplbl if tplbl != "" else "ゲームスタート"
-
-    def top_update_text_label(self, dt):
-        self.text_label.text = self.txt_lbl
-
-    def top_update_top_label(self, dt):
-        self.top_label.text = self.top_lbl
-
-    def menu_btn(self):  # 機能的凝集、スタンプ結合
-        # メニュースライド呼び出し
-        self.parent.manager.transition = WipeTransition()
-        self.parent.manager.current = 'menu_screen'
+        self.top_label.text = tplbl if tplbl != "" else "ゲームスタート(MTL)"
 
     def top_menu_btn(self):  # メッセージ結合
         self.reset()
 
     def reset(self):  # 手続き型凝集、スタンプ結合
+
         self.clear_widgets()
-        self.parent.add_widget(MainTopWidget("リセットしました"))
-        self.parent.children[0].add_widget(MainWidget())
+        self.parent.add_widget(MainTopLayout("リセットしました"))
+        self.parent.children[0].add_widget(MainButtonLayout())
 
+    def menu_btn(self):  # 機能的凝集、スタンプ結合
+        # setting_screen呼び出し
+        self.change_screen("m_s_s")
 
-class SuperWidget(GridLayout):
-    """MainWidget,BattleWidget専用の継承クラス"""
-    art_dict = ObjectProperty("")
+class BattleTopLayout(SuperTopLayout):
 
-    def __init__(self, **kwargs):
+    def __init__(self, tplbl="", **kwargs):  # スタンプ結合
         super().__init__(**kwargs)
-        self.se = Se()
+        self.top_label.text = tplbl if tplbl != "" else "ゲームスタート(BTL)"
 
-    def widget_change(self, widget):  # 手続き型凝集、スタンプ結合
-        pa = self.parent
+    def top_menu_btn(self):  # メッセージ結合
+        content = PopupMenu(popup_close=self.popup_close,popup_yes=self.popup_yes)
+        self.popup = Popup(title="逃げますか？", content=content, size_hint=(0.5, 0.5))
+        self.popup.open()
+
+
+    def popup_yes(self):
+        self.reset()
+        self.popup.dismiss()
+
+    def popup_close(self):
+        self.popup.dismiss()
+
+
+
+    def reset(self):  # 手続き型凝集、スタンプ結合
+
+        self.parent.manager.current = "main_screen"
         self.clear_widgets()
-        pa.add_widget(widget)
-        pa.remove_widget(pa.children[1])
+        self.parent.add_widget(BattleTopLayout("リセットしましたBTL"))
+        self.parent.children[0].add_widget(BattleButtonLayout())
+    def menu_btn(self):  # 機能的凝集、スタンプ結合
+        # setting_screen呼び出し
+        self.change_screen("b_s_s")
 
-    def update_top_label(self, dt):
-        self.parent.top_label.text = self.top_lbl
-        # Clock.schedule_once(self.update_top_label) で呼び出しで更新
-
-    def update_text_label(self, dt):
-        self.parent.text_label.text = self.txt_lbl
-        # Clock.schedule_once(self.update_text_label) で呼び出しで更新
-
-    def pushed_btn(self, btn_str: str):  # データ結合
-        self.text_change(btn_str)
-
-    def text_change(self, t):
-        self.se.se_play("correct.mp3")
+class PopupMenu(BoxLayout):
+    popup_close = ObjectProperty(None)
+    popup_yes = ObjectProperty(None)
 
 
-class MainWidget(SuperWidget):
+class MainButtonLayout(SuperButtonLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -157,7 +154,8 @@ class MainWidget(SuperWidget):
 
         if t == "A":
             ans = t + "ボタンを選択"
-            self.widget_change(TestWidget())
+            #self.widget_change(BattleButtonLayout())
+            self.parent.change_screen("battle_screen")
 
         elif t == "B":
             ans = t + "ボタンを選択"
@@ -169,7 +167,7 @@ class MainWidget(SuperWidget):
             ans = t
 
 
-class TestWidget(SuperWidget):
+class BattleButtonLayout(SuperButtonLayout):
     """テスト環境用のレイアウトウィジェット
         モジュールの動作確認等に使う"""
 
@@ -192,8 +190,8 @@ class TestWidget(SuperWidget):
                                                             reverse=True, key=attrgetter("spd"))]]
 
     def update_btn_welcome_test_env(self, dt):
-        self.parent.top_label.text = "テスト環境" + str(self.current_turn) + "ターン目"
-        self.parent.text_label.text = "テストテキスト"
+        # self.parent.top_label.text = "テスト環境" + str(self.current_turn) + "ターン目"
+        # self.parent.text_label.text = "テストテキスト"
         self.a_btn.text = "戦闘呼び出し(テスト)"
         self.b_btn.text = "(未実装)"
         self.c_btn.text = "(未実装)"
@@ -423,13 +421,24 @@ class BattleField(BoxLayout):
         self.act_6 = "is_not_Character"
 
 
-class MenuScreen(Screen):
+class MSettingScreen(Screen):
     """メニューボタンを押すとメニューが開ける。
         下記にはkvファイルに登録した関数の処理を記述"""
+    def __init__(self, **kw):
+        super().__init__(**kw)
 
     def main_slide(self):
         self.parent.transition = WipeTransition()
-        self.parent.current = "root_screen"
+        self.parent.current = "main_screen"
+class BSettingScreen(Screen):
+    """メニューボタンを押すとメニューが開ける。
+        下記にはkvファイルに登録した関数の処理を記述"""
+    def __init__(self, **kw):
+        super().__init__(**kw)
+
+    def main_slide(self):
+        self.parent.transition = WipeTransition()
+        self.parent.current = "battle_screen"
 
 
 class OSHero(BoxLayout):
