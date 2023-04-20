@@ -5,39 +5,44 @@ from MartialArts import MartialArts
 
 class Character:
     """キャラクター"""
+    arts = di.arts_dict_list
+    weapons = di.weapon_dict_list
+    armors = di.armor_dict_list
+    characters = di.character_dict_list
 
-    def __init__(self, chara_no,is_hero = 0):
-        arts = di.arts_dict_list
-        weapon = di.weapon_dict_access
-        armor = di.armor_dict_access
-        chara_status = di.character_dict_access(str(chara_no))
+    def __init__(self, chara_no: int, is_hero=0):
+        chara = self.characters[chara_no]
 
-        self.name = chara_status[0]
-        self.maxhp = chara_status[1]
+        self.name = chara["name"]
+        self.maxhp = chara["hp"]
         self.hp = self.maxhp
-        self.atk = chara_status[2]
-        self.spd = chara_status[3]
-        self.arts = [arts[1], arts[2],arts[3]]
-        # 「下記要検証」何がしたかったのか、失念
-        self.artsA = map(lambda i: MartialArts(i), self.arts)
-        self.equ = weapon(1), armor(2)
-        # self.image = chara_status[10]
-        self.is_hero = is_hero #0=Enemy,1 =Hero
-        self.status = lambda: "『" + str(self.name) + "』　hp:" + str(math.floor(self.hp)) + "/" + str(
+        self.atk = chara["atk"]
+        self.spd = chara["spd"]
+
+        self.arts = [self.arts[-1], self.arts[2], self.arts[3]]
+        self.weapon = self.weapons[1]
+        self.armor = self.armors[2]
+        self.is_hero = is_hero  # 0=Enemy,1 =Hero
+
+    def status(self):
+        return "『" + str(self.name) + "』　hp:" + str(math.floor(self.hp)) + "/" + str(
             math.floor(self.maxhp)) + "　ATK:" + str(self.atk) + "　SPD:" + str(self.spd)
-        self.status_hp = lambda: "『" + str(self.name) + "』　hp:" + str(math.floor(self.hp)) + "/" + str(
+
+    def status_hp(self):
+        return "『" + str(self.name) + "』　hp:" + str(math.floor(self.hp)) + "/" + str(
             math.floor(self.maxhp))
-        # 　↓　markup対応
-        self.name_txt = lambda: "[b][u]" + self.name + "[/u][/b]"
-        self.status_txt = lambda : "H P:　" + str(self.hp) + "\nATK:　" + str(self.atk) + "\nSPD:　" + str(self.spd) + "\n"
-        self.status_full_txt = lambda: "H P:　" + str(self.hp) + "　/　" + str(self.maxhp) + "\nATK:　" + str(
+
+    # markup対応↓
+    def name_txt(self):
+        return "[b][u]" + self.name + "[/u][/b]"
+
+    def status_txt(self):
+        return "H P:　" + str(self.hp) + "\nATK:　" + str(self.atk) + "\nSPD:　" + str(self.spd) + "\n"
+
+    def status_full_txt(self):
+        return "H P:　" + str(self.hp) + "　/　" + str(self.maxhp) + "\nATK:　" + str(
             self.atk) + "\nSPD:　" + str(self.spd) + "\n"
 
     def status_up(self):
-        if self.maxhp < 999:
-            self.maxhp = self.maxhp + 1000
-
-            if self.maxhp >= 999:
-                self.maxhp = 999
-
+        self.maxhp = 999 if self.maxhp != 999 else None
         self.hp = self.maxhp

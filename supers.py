@@ -14,12 +14,20 @@ from kivy.core.window import Window
 from kivy.config import Config
 from kivy.uix.widget import Widget
 
+
+from kivy.uix.popup import Popup
 from Player import Player as Pl
 from Character import Character as Ch
 from time import sleep
 from sounds.Sounds import Sounds as Se
 from Battle import Battle
 import dictionaries as di
+class MainScreen(Screen):
+    pass
+
+
+class BattleScreen(Screen):
+    pass
 
 
 class SuperTopLayout(GridLayout):
@@ -40,7 +48,7 @@ class SuperTopLayout(GridLayout):
 
 class SuperButtonLayout(GridLayout):
     """MainWidget,BattleWidget専用の継承クラス"""
-    art_dict = ObjectProperty("")
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -91,7 +99,7 @@ class BSettingScreen(Screen):
         self.parent.current = "battle_screen"
 
 
-class OSHero(BoxLayout):
+class OrderListHero(BoxLayout):
     chara_name = ObjectProperty()
 
     def __init__(self, character, **kwargs):
@@ -99,7 +107,7 @@ class OSHero(BoxLayout):
         self.chara_name.text = character.name_txt()
 
 
-class OSEnemy(BoxLayout):
+class OrderListEnemy(BoxLayout):
     chara_name = ObjectProperty()
 
     def __init__(self, character, **kwargs):

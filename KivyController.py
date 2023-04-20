@@ -1,15 +1,9 @@
-from kivy.uix.popup import Popup
+import random
 
 from supers import *
 
-import numpy as np
-
-Config.set("graphics", "width", 700)
-Config.set("graphics", "height", 700)
-
 # 指定したkvファイル読み込み
 # Builder.load_file("my.kv")
-"""ウィンドウ制御、レイアウト関連クラス"""
 
 global g_player
 
@@ -19,22 +13,22 @@ class KiApp(App):
         """ビルドされた時に1度だけ実行"""
 
         Window.size = (720, 1280)
-        self.title = 'test game'
+        self.title = ''
         self.icon = "image/icon.png"
 
-        he = [Ch(1, 1), Ch(2, 1),
-              Ch(3, 1)
-              ]
+        he = [
+            Ch(-1, 1),
+            #Ch(-1, 1),
+            #Ch(-1, 1)
+        ]
 
         global g_player
         g_player = Pl("テストプレイヤー", he)
 
-        # 起動時の実行環境の切り替え 「MainWidget()」,「TestWidget()」
-        return self.env_execute(BattleButtonLayout())
+        return self.env_execute()
 
-    def env_execute(self, environment):  # 手続き型凝集、スタンプ結合
+    def env_execute(self, ):  # 手続き型凝集、スタンプ結合
 
-        """起動時の実行環境を選択"""
         sm = ScreenManager()  # スクリーンマネージャを起動
         [
             sm.add_widget(screen) for screen in
@@ -52,14 +46,15 @@ class KiApp(App):
         bl = BattleButtonLayout()
         ml = MainButtonLayout()
 
-        sm.children[0].add_widget(btl)  # スクリーンに画面上部のウィジェットを紐付け
-        sm.children[0].children[0].add_widget(bl)
-
-        sm.current = "main_screen"
-        sm.children[0].add_widget(mtl)  # スクリーンに画面上部のウィジェットを紐付け
-        sm.children[0].children[0].add_widget(ml)  # 上部のウィジェットに下部のウィジェットを紐付け"""
+        self.screen_layout(sm, btl, bl)
+        self.screen_layout(sm, mtl, ml, "main_screen")
 
         return sm
+
+    def screen_layout(self, sm, top_layout, btn_layout, current_screen=None):
+        sm.current = current_screen if current_screen is not None else None
+        sm.children[0].add_widget(top_layout)
+        sm.children[0].children[0].add_widget(btn_layout)
 
     def on_pause(self):
         """ ポーズ時のイベント """
@@ -79,12 +74,6 @@ class KiApp(App):
         return
 
 
-class MainScreen(Screen):
-    pass
-
-
-class BattleScreen(Screen):
-    pass
 
 
 class MainTopLayout(SuperTopLayout):
@@ -107,7 +96,6 @@ class MainTopLayout(SuperTopLayout):
 
 
 class BattleTopLayout(SuperTopLayout):
-
     def __init__(self, tplbl="", **kwargs):  # スタンプ結合
         super().__init__(**kwargs)
         self.top_label.text = tplbl if tplbl != "" else "ゲームスタート(BTL)"
@@ -128,17 +116,12 @@ class BattleTopLayout(SuperTopLayout):
 
         self.parent.manager.current = "main_screen"
         self.clear_widgets()
-        self.parent.add_widget(BattleTopLayout("リセットしましたBTL"))
+        self.parent.add_widget(BattleTopLayout("リセットしました"))
         self.parent.children[0].add_widget(BattleButtonLayout())
 
     def menu_btn(self):  # 機能的凝集、スタンプ結合
         # setting_screen呼び出し
         self.change_screen("b_s_s")
-
-
-
-
-
 
 
 class MainButtonLayout(SuperButtonLayout):
@@ -147,49 +130,60 @@ class MainButtonLayout(SuperButtonLayout):
 
     def text_change(self, t):
         super().text_change(t)
-        ans = None
 
         if t == "A":
-            ans = t + "ボタンを選択"
-            # self.widget_change(BattleButtonLayout())
             self.parent.change_screen("battle_screen")
 
         elif t == "B":
-            ans = t + "ボタンを選択"
+            pass
 
         elif t == "C":
             pass
 
         else:
-            ans = t
+            pass
 
 
 class BattleButtonLayout(SuperButtonLayout):
-    """テスト環境用のレイアウトウィジェット
-        モジュールの動作確認等に使う"""
+    """戦闘用レイアウトBattleScreenに紐付ける"""
 
-    # target_type = StringProperty(None)
+    art_dict = ObjectProperty("")
+    acted_list = ObjectProperty([])
+    act_arts = ObjectProperty([])
+    global g_player
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_ac_count = 0
         self.max_ac_count = 0
         self.current_turn = 0
-        global g_player
-        self.max_cost = g_player.max_cost
-        player_party = g_player.party
+
+        self.player = g_player
+        self.enemy_party = self.enemies_generate()
         Clock.schedule_once(self.update_btn)
-        self.en = [Ch(1), Ch(3), Ch(4)]
-        self.order_of_action_list_insert = lambda: [self.parent.children[3].children[0].add_widget(chara_in_widget) for
-                                                    chara_in_widget in
-                                                    [OSHero(c) if c.is_hero == 1 else OSEnemy(c) for c in
-                                                     sorted([c for c in player_party + self.en if c != "empty"],
-                                                            reverse=True, key=attrgetter("spd"))]]
-        self.acted_member = ()
+
+    # buttonから呼び出される
+    def action_exe(self, t, _=None):
+        return [self.target_select(arts) if arts["name"] == t else _ for arts in di.arts_dict_list]
+
+    def order_list_insert(self):
+        [self.parent.children[3].children[0].add_widget(chara_in_widget) for chara_in_widget in
+         [OrderListHero(c) if c.is_hero == 1 else OrderListEnemy(c) for c in
+          sorted([c for c in self.player.party + self.enemy_party if c != "empty"], reverse=True,
+                 key=attrgetter("spd"))]]
+
+    def enemies_generate(self):
+        en = [
+            Ch(random.randrange(1, 10)),
+            Ch(random.randrange(1, 10)),
+            Ch(random.randrange(1, 10)),
+        ]
+        return en
+
     def update_btn(self, dt):
         # self.parent.top_label.text = "テスト環境" + str(self.current_turn) + "ターン目"
         # self.parent.text_label.text = "テストテキスト"
-        self.a_btn.text = "戦闘呼び出し(テスト)"
+        self.a_btn.text = "戦闘開始(テスト)"
         self.b_btn.text = "(未実装)"
         self.c_btn.text = "(未実装)"
 
@@ -204,14 +198,12 @@ class BattleButtonLayout(SuperButtonLayout):
     def text_change(self, t, _=None):
 
         super().text_change(t)
-        if t == "戦闘呼び出し(テスト)":
+        if t == "戦闘開始(テスト)":
             self.btn_ins()
-            self.order_of_action_list_insert()
+            self.order_list_insert()
             self.turn_start()
         elif t == "戦闘実行(本番)":
             pass
-        else:
-            [self.target_select(arts) if arts["name"] == t else _ for arts in di.arts_dict_list]
 
     def turn_start(self):
 
@@ -230,6 +222,30 @@ class BattleButtonLayout(SuperButtonLayout):
         self.max_ac_count = hero_count
 
     # == == == == == == == == == == == == == == =
+
+    def action_start(self):
+        print("acted_list:", self.acted_list)
+        action_list = []
+        for i in range(len(self.acted_list)):
+            action_list.append(
+                [
+                    self.acted_list[i],
+                    self.act_arts[i],
+                ]
+            )
+
+        print(action_list[0][0])
+
+        srtd_actd_lst = sorted([chara[0]for chara in action_list], reverse=True, key=attrgetter("spd"))
+        print(srtd_actd_lst)
+        srtd_actn_lst = [[g[0], g[1]] for g in srtd_actd_lst]
+
+        for act in srtd_actn_lst:
+            print(act[0].name)
+            print(act[1]["name"])
+
+        return self.turn_end()
+
     def turn_end(self):
 
         pa = self.parent.children[2].children[0]
@@ -239,7 +255,8 @@ class BattleButtonLayout(SuperButtonLayout):
                 pa.children[i].hero_card.selected_arts.text = pa.children[i].sel_arts_bs
             else:
                 pass
-        self.turn_start()
+        self.acted_list = ObjectProperty([])
+        return self.turn_start()
 
     def target_select(self, arts):
         txt_lbl = ""
@@ -263,35 +280,36 @@ class BattleButtonLayout(SuperButtonLayout):
 
     def btn_ins(self, _=None):
 
-        """画面左(HeroCard)にボタンを挿入"""
-        left_pt_full = g_player.party + ["", ""]  # 先に空(empty)を挿入
+        """HeroFieldに(右側)にカードを挿入"""
+        left_pt_full = self.player.party + ["", ""]  # 先に空(empty)を挿入
 
         [self.parent.children[2].children[0].add_widget(chara_in_widget) for chara_in_widget in
          [HeroCard(c) if c != "" else EmptySpace() for c in left_pt_full[0:3]]]
 
         # 右画面にEnemyボタンを挿入
 
-        bfr_pt_full = self.en + ["", ""]  # 後続に空を挿入
+        bfr_pt_full = self.enemy_party + ["", ""]  # 後続に空を挿入
 
         [self.parent.children[2].children[2].add_widget(chara_in_widget) for chara_in_widget in
-         [EnemyField(c) if c != "" else EmptySpace() for c in bfr_pt_full[0:3]]]
+         [EnemyCard(c) if c != "" else EmptySpace() for c in bfr_pt_full[0:3]]]
 
 
 class HeroCard(ButtonBehavior, BoxLayout):
     """自陣カードの表示設定"""
+    selected_arts_no = ObjectProperty(None)
 
     def __init__(self, character: Ch, **kwargs):
         super().__init__(**kwargs)
-        chara = character
+        self.chara = character
 
-        self.name.text = chara.name_txt()
-        self.hpbar.max = chara.maxhp
-        self.hpbar.now = chara.hp
+        self.name.text = self.chara.name_txt()
+        self.hpbar.max = self.chara.maxhp
+        self.hpbar.now = self.chara.hp
         self.hpbar.text = "HP:" + str(self.hpbar.now) + "/" + str(self.hpbar.max)
 
-        self.hero_card.atk = chara.atk
-        self.hero_card.spd = chara.spd
-        self.arts_list = chara.arts
+        self.hero_card.atk = self.chara.atk
+        self.hero_card.spd = self.chara.spd
+        self.arts_list = self.chara.arts
 
         self.sel_arts_bs = '(技名スペース)'
         self.selected_arts.text = self.sel_arts_bs
@@ -338,7 +356,7 @@ class HeroCard(ButtonBehavior, BoxLayout):
         prt.part_c += 1
 
     def test_hp_damage(self, damage=0):
-
+        # バー動作確認用の自傷ダメージ処理
         if self.hpbar.now > damage > 0:
             self.hpbar.now -= damage
             self.hpbar.text = "HP:" + str(self.hpbar.now) + "/" + str(self.hpbar.max)
@@ -347,6 +365,7 @@ class HeroCard(ButtonBehavior, BoxLayout):
             self.hpbar.text = "HP:0/" + str(self.hpbar.max)
 
     def arts_on_display(self: Ch):
+        # HeroCardを選択した後にBattleButtonLayoutのButtonのテキストにHeroの技(Arts)を表示させる処理
         if self.hero_card.is_active != "acted":
             for i in range(3):
                 if self.parent.children[i].is_active == "active":
@@ -354,13 +373,15 @@ class HeroCard(ButtonBehavior, BoxLayout):
 
             self.hero_card.is_active = "active"
 
+            # BattleButtonLayoutへ送る
             pnc = self.parent.parent.parent
 
+            pnc.children[0].acted_list.append(self.chara)
             pnc.children[0].art_dict = self.arts_list
             # Buttonの名称を技名に変更
-            pnc.children[0].a_btn.text = "技コスト:" + str(self.arts_list[0]["cost"]) + "\n　" + self.arts_list[0]["name"]
-            pnc.children[0].b_btn.text = "技コスト:" + str(self.arts_list[1]["cost"]) + "\n　" + self.arts_list[1]["name"]
-            pnc.children[0].c_btn.text = "技コスト:" + str(self.arts_list[2]["cost"]) + "\n　" + self.arts_list[2]["name"]
+            for i, btn in enumerate(["a", "b", "c"]):
+                pnc.children[0].ids[f"{btn}_btn"].text = "技コスト:" + str(self.arts_list[i]["cost"]) + "\n　" + \
+                                                         self.arts_list[i]["name"]
 
             pnc.text_label.text = "技を選択してください。"
 
@@ -370,11 +391,9 @@ class HeroCard(ButtonBehavior, BoxLayout):
             pass
 
 
-class EnemyField(ButtonBehavior, BoxLayout):
-    """Heroウィジェットを設置するスペース兼Enemy表示
-        継承クラスによる挙動の違い
-        AnchorLayout = 重ねたカードが最前面へ
-        BoxLayout = 重ねたカードが横に行きレイアウト内で共存
+class EnemyCard(ButtonBehavior, BoxLayout):
+    """
+    Enemyカード
         """
 
     def __init__(self, character, **kwargs):
@@ -387,15 +406,16 @@ class EnemyField(ButtonBehavior, BoxLayout):
         pnc = self.parent.parent.parent.children[0]
         empty = ""
         for i in range(3):
-            # for i in pa:
-            if pa.children[i].hero_card.is_active == "active":
+            hc = pa.children[i]
+            if hc.hero_card.is_active == "active":
                 pnc.is_ac_count += 1
-                pa.children[i].hero_card.is_active = "acted"
-                pa.children[i].hero_card.selected_arts.text = "決定"
+                hc.hero_card.is_active = "acted"
+                # self.parent.parent.battle_field.act_list.append(self.parent.parent.children[2].hero_card.chara)
+                hc.selected_arts.text = "決定"
                 pnc.art_dict = empty
-                pnc.a_btn.text = empty
-                pnc.b_btn.text = empty
-                pnc.c_btn.text = empty
+                for btn in ["a", "b", "c"]:
+                    pnc.ids[f"{btn}_btn"].text = empty
+
 
             else:
                 pass
@@ -403,13 +423,12 @@ class EnemyField(ButtonBehavior, BoxLayout):
         # if pa.children[0].hero_card.is_active == "acted" and pa.children[1].hero_card.is_active == "acted" and pa.children[2].hero_card.is_active == "acted":
         if pnc.is_ac_count == pnc.max_ac_count:
             pnc.is_ac_count = 0
-            pnc.turn_end()
+            pnc.action_start()
 
 
 class BattleField(BoxLayout):
+    act_list = ObjectProperty([])
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # 行動をここに格納し、行動時はここから呼び出す。
-        self.act_1 = None
-        self.act_2 = None
-

@@ -1,58 +1,61 @@
 # """key: [スキル名,スキルテキスト,ターゲット類(0=未分類、1=自分,2=味方単体,3=味方全体,4=敵単体,5=敵全体)
-#   ,コスト(1~5),攻撃倍率(1.0 ~ 3.0),スキルレベル(1),ATKの影響(0.00 ~ 1.00),SPDの影響(0.00 ~ 1.00),テキスト]
+#   ,コスト(1~5),攻撃属性,攻撃倍率(1.0 ~ 3.0),スキルレベル(1),ATKの影響(0.00 ~ 1.00),SPDの影響(0.00 ~ 1.00),テキスト]
 #          ATKの影響とSPDの影響は合計して1.00になるようにする。"""
 
 arts_dict_list = [
     {"no": 0, "name": "------", "target_type": "-------", "cost": 0, "atk_type": "none", "damage_rate": 0,
      "skill_level": 0, "atk_impact": 0, "spd_impact": 0, "arts_text": "------"},
+
     {"no": 1, "name": "殴る", "target_type": "enemy", "cost": 1, "atk_type": "none", "damage_rate": 1, "skill_level": 1,
-     "atk_impact": 0.5, "spd_impact": 0.5, "arts_text": "自分も痛いが、反動ダメージはない。","test":100},
+     "atk_impact": 0.5, "spd_impact": 0.5, "text": "自分も痛い。", },
     {"no": 2, "name": "蹴る", "target_type": "enemy", "cost": 1, "atk_type": "none", "damage_rate": 1, "skill_level": 1,
-     "atk_impact": 0.5, "spd_impact": 0.5, "arts_text": "(未実装)","test":50},
+     "atk_impact": 0.5, "spd_impact": 0.5, "text": "(未実装)", },
     {"no": 3, "name": "ずつく", "target_type": "enemy", "cost": 1, "atk_type": "none", "damage_rate": 1, "skill_level": 1,
-     "atk_impact": 0.5, "spd_impact": 0.5, "arts_text": "(未実装)","test":75},
+     "atk_impact": 0.5, "spd_impact": 0.5, "text": "(未実装)",},
+    {"no": 99, "name": "テスト", "target_type": "enemy", "cost": 0, "atk_type": "none", "damage_rate": 1, "skill_level": 1,
+     "atk_impact": 10, "spd_impact": 10, "text": "テスト用artsZ",},
+
+]
+
+# key: [アイテム名,攻撃力,テキスト]
+
+weapon_dict_list = [
+    {"no": 0, "name": "------", "atk": 0, "text": "------"},
+
+    {"no": 1, "name": "サック", "atk": 2, "text": "(未実装)"},
+    {"no": 2, "name": "木刀", "atk": 4, "text": "(未実装)", },
+    {"no": 3, "name": "ナイフ", "atk": 5, "text": "(未実装)", },
+
+    {"no": 99, "name": "テストウェポン", "atk": 5, "text": "テスト用武器", },
+
+]
+# key: [アイテム名,防御力,テキスト]
+armor_dict_list = [
+    {"no": 0, "name": "------", "def": 0, "text": "------"},
+
+    {"no": 1, "name": "Tシャツ", "def": 2, "text": "(未実装)"},
+    {"no": 2, "name": "Yシャツ", "def": 4, "text": "(未実装)", },
+    {"no": 99, "name": "テストアーマー", "def": 4, "text": "テスト用防具", },
+    # {"no": 3, "name": "ナイフ", "def": 5, "text": "(未実装)", },
+
+]
+character_dict_list = [
+            #key: [名前,HP(50~250),ATK(0~20),SPD(0~20)]
+    {"no": 0, "name": "------", "hp": 0, "atk": 0, "spd": 0, "text": "------"},
+
+    {"no": 1, "name": "アリ", "hp": 55, "atk": 15, "spd": 3, "text": "蟻"},
+    {"no": 2, "name": "イカ", "hp": 80, "atk": 5, "spd": 8, "text": "烏賊"},
+    {"no": 3, "name": "ウマ", "hp": 105, "atk": 11, "spd": 10, "text": "馬"},
+    {"no": 4, "name": "エビ", "hp": 85, "atk": 9, "spd": 9, "text": "海老"},
+    {"no": 5, "name": "オニ", "hp": 95, "atk": 15, "spd": 1, "text": "鬼"},
+    {"no": 6, "name": "カイ", "hp": 80, "atk": 8, "spd": 9, "text": "貝"},
+    {"no": 7, "name": "キジ", "hp": 70, "atk": 10, "spd": 14, "text": "雉"},
+    {"no": 8, "name": "クジラ", "hp": 140, "atk": 8, "spd": 2, "text": "鯨"},
+    {"no": 9, "name": "ケムシ", "hp": 50, "atk": 12, "spd": 2, "text": "毛虫"},
+    {"no": 10, "name": "コオロギ", "hp": 70, "atk": 4, "spd":7, "text": "蟋蟀"},
+
+    {"no": 99, "name": "テストキャラ", "hp": 250, "atk": 20, "spd": 20, "text": "テスト用キャラ"},
+
 ]
 
 
-# "4": ["もやす", 5, 2, 225, 13, 6, "", ],"5": ["思念波", 4, 2, 225, 13, 6, "", ],
-
-
-def weapon_dict_access(weapon_no: int):
-    """key: [アイテム名,攻撃力,テキスト]
-           """
-    weapon_dict = {
-
-        "1": ["木製サック", 2, "自家製。"],
-        "2": ["量産サック", 4, "店頭に並んでいたサック。"],
-        "3": ["100均のナイフ", 5, "切れ味は悪い。"],
-
-    }
-    return weapon_dict[str(weapon_no)]
-
-
-def armor_dict_access(armor_no: int):
-    """key: [アイテム名,防御力,テキスト]
-               """
-
-    armor_dict = {
-
-        "1": ["少年誌", 2, "もう読むことはない。"],
-        "2": ["辞典", 4, "読まない。"],
-
-    }
-
-    return armor_dict[str(armor_no)]
-
-
-def character_dict_access(chara_no: int):
-    """ key: [名前,HP(50~250),ATK(0~20),SPD(0~20)]"""
-
-    chara_dict = {
-        "1": ["アリ", 150, 15, 3, ],
-        "2": ["イカ", 100, 5, 18],
-        "3": ["ウマ", 225, 13, 6],
-        "4": ["エビ", 85, 17, 4],
-        "6": ["カイ", 225, 13, 6]
-    }
-
-    return chara_dict[str(chara_no)]

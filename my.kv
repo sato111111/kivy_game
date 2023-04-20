@@ -228,16 +228,9 @@
         #ターン終了
 
     BattleField:###[0]
+        battle_field:battle_field
         id:battle_field
 
-
-        #ここから行動を呼び出す
-        act_1:""
-        act_2:""
-        act_3:""
-        act_4:""
-        act_5:""
-        act_6:""
 
         orientation: 'horizontal' if root.height >= root.width else 'vertical'
 
@@ -245,6 +238,7 @@
         enemies_field:enemies_field
 
         HeroesField:
+
             orientation: 'vertical' if root.height >= root.width else 'horizontal'
             id: heroes_filed
 
@@ -281,14 +275,38 @@
         size_hint: 1, .08
 
 ######################################################
-
-<MainButtonLayout,BattleButtonLayout>:
+<SuperButtonLayout>:
     id:main_widget
-    target_type:""
+
     padding:10
     spacing:10
     cols:3
     size_hint :1,.16
+<MainButtonLayout>:
+    MenuButton:
+        size_hint :1,.8
+        id:a_btn
+        text:'A'
+        is_info:''
+        on_release:
+            root.pushed_btn(self.text)
+    MenuButton:
+        size_hint :1,.8
+        id:b_btn
+        text:'B'
+        is_info:''
+        on_release:
+            root.pushed_btn(self.text)
+    MenuButton:
+        size_hint :1,.8
+        id:c_btn
+        text:'C'
+        is_info:''
+        on_release:
+            root.pushed_btn(self.text)
+<BattleButtonLayout>:
+    id:battle_button_layout
+    target_type:""
     a_btn:a_btn
     b_btn:b_btn
     c_btn:c_btn
@@ -299,15 +317,16 @@
         text:'A'
         is_info:''
         on_release:
-            if root.art_dict != "":root.pushed_btn(root.art_dict[0]["name"]);root.target_type = root.art_dict[0]["target_type"]
+            if root.art_dict != "":root.action_exe(root.art_dict[0]["name"]);root.target_type = root.art_dict[0]["target_type"];root.act_arts.append(root.art_dict[0])
             else: root.pushed_btn(self.text)
+
     MenuButton:
         size_hint :1,.8
         id:b_btn
         text:'B'
         is_info:''
         on_release:
-            if root.art_dict != "":root.pushed_btn(root.art_dict[1]["name"]);root.target_type = root.art_dict[1]["target_type"]
+            if root.art_dict != "":root.action_exe(root.art_dict[1]["name"]);root.target_type = root.art_dict[1]["target_type"];root.act_arts.append(root.art_dict[1])
             else: root.pushed_btn(self.text)
 
     MenuButton:
@@ -316,7 +335,7 @@
         text:'C'
         is_info:''
         on_release:
-            if root.art_dict != "":root.pushed_btn(root.art_dict[2]["name"]);root.target_type = root.art_dict[2]["target_type"]
+            if root.art_dict != "":root.action_exe(root.art_dict[2]["name"]);root.target_type = root.art_dict[2]["target_type"];root.act_arts.append(root.art_dict[2])
             else: root.pushed_btn(self.text)
 
 
@@ -421,7 +440,7 @@
             width:1.3
 
 
-<EnemyField>:
+<EnemyCard>:
     enemy_field:enemy_field
     id:enemy_field
 
@@ -446,7 +465,6 @@
     orientation:'horizontal'
     on_release:
         if root.parent.parent.parent.children[0].target_type == "enemy":root.enemy_select();root.parent.parent.canvas.add(Line(points=[self.strt_x, self.strt_y, self.goal_x-self.tri_x,self.strt_y],width=12))
-        #root.parent.parent.canvas.add(Triangle(points=[self.goal_x - self.tri_x, self.goal_y-self.tri_y, self.goal_x, self.goal_y,self.goal_x-self.tri_x,self.goal_y+self.tri_y]))
 
 
     canvas.before:
@@ -592,7 +610,7 @@
     id:order_space
     orientation:'horizontal'
 
-<OSHero>:
+<OrderListHero>:
     chara_name:chara_name
     canvas.before:
         Color:
@@ -608,7 +626,7 @@
     Cstmlbl_fs15:
         bs_fntsz:26
         id:chara_name
-<OSEnemy>:
+<OrderListEnemy>:
     chara_name:chara_name
     canvas.before:
         Color:

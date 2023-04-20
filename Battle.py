@@ -1,3 +1,8 @@
+from operator import attrgetter
+# 以下テスト用
+import random
+from Character import Character as Ch
+
 from MartialArts import MartialArts as MA
 
 turn = 0
@@ -38,7 +43,7 @@ class Battle:
 
         if hpc_txt is not None:
             dam_str = dam_str + hpc_txt
-            #例 10ダメージ与えた enemyを倒した
+            # 例 10ダメージ与えた enemyを倒した
 
         battle_result = self.party_check()
 
@@ -46,7 +51,7 @@ class Battle:
             dam_str = dam_str + battle_result
             turn = 0
 
-        #under_txt = turn_str + dam_str
+        # under_txt = turn_str + dam_str
         under_txt = dam_str
 
         return under_txt, self.h_p, self.e_p
@@ -80,7 +85,7 @@ class Battle:
 
 
         elif h.hp <= 0:
-            message = h.name+ "はやられた"
+            message = h.name + "はやられた"
             self.h_p.pop(h_target)
 
         else:
@@ -90,3 +95,36 @@ class Battle:
 
     def move_select(self, chara):
         chara.arts
+
+
+class BattleTest:
+    def __init__(self, characters=None):
+        self.next_turn_list = []
+        self.down_list = []
+        self.characters = []
+
+    def spd_sort(self, party_list):
+        sorted_list = sorted(party_list, reverse=True, key=attrgetter("spd"))
+
+        return sorted_list
+
+    def battle_test(self):
+        for chara in self.characters:
+            chara.hp -= 200
+        down_list = []
+        next_turn_list = []
+
+        [next_turn_list.append(f.name) if f.hp > 0 else down_list.append(f) for f in self.characters]
+        print(next_turn_list)
+
+        print([f.name +"//"+ str(f.hp) +"//"+str(f.spd) for f in self.spd_sort(down_list)])
+
+    def test_attack(self):
+        turn = "a"
+
+
+btst = BattleTest()
+
+[btst.characters.append(Ch(random.randrange(1, 10))) for _ in range(6)]
+
+btst.battle_test()
