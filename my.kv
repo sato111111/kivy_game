@@ -3,6 +3,7 @@
 #:import Triangle kivy.graphics.Triangle
 
 <MainScreen>:
+    id:target_line
     canvas:
         Color:
             rgba:0,.3,0,1
@@ -12,8 +13,9 @@
             pos: self.pos
             size: self.size
 
-    id:target_line
+
 <BattleScreen>:
+    id:target_line
     canvas:
         Color:
             rgba:0,.3,0,1
@@ -23,7 +25,7 @@
             pos: self.pos
             size: self.size
 
-    id:target_line
+
 <MainTopLayout>: ####parent
     id:main_top_layout
     menu_button:menu_button
@@ -311,31 +313,29 @@
     b_btn:b_btn
     c_btn:c_btn
 
+
     MenuButton:
         size_hint :1,.8
         id:a_btn
         text:'A'
-        is_info:''
         on_release:
-            if root.art_dict != "":root.action_exe(root.art_dict[0]["name"]);root.target_type = root.art_dict[0]["target_type"];root.act_arts.append(root.art_dict[0])
-            else: root.pushed_btn(self.text)
+            if root.select_hero != "":root.action_exe(0)
+            else:root.pushed_btn(self.text)
 
     MenuButton:
         size_hint :1,.8
         id:b_btn
         text:'B'
-        is_info:''
         on_release:
-            if root.art_dict != "":root.action_exe(root.art_dict[1]["name"]);root.target_type = root.art_dict[1]["target_type"];root.act_arts.append(root.art_dict[1])
+            if root.select_hero != "":root.action_exe(1)
             else: root.pushed_btn(self.text)
 
     MenuButton:
         size_hint :1,.8
         id:c_btn
         text:'C'
-        is_info:''
         on_release:
-            if root.art_dict != "":root.action_exe(root.art_dict[2]["name"]);root.target_type = root.art_dict[2]["target_type"];root.act_arts.append(root.art_dict[2])
+            if root.select_hero != "":root.action_exe(2)
             else: root.pushed_btn(self.text)
 
 
@@ -359,7 +359,8 @@
     name:name
     hpbar:hpbar
     selected_arts:selected_arts
-
+    card_pos_x:root.center_x
+    card_pos_y:root.center_y
     is_active:"standby"
     is_arts:"standby"
     atk:1
@@ -449,8 +450,8 @@
 
     _:1
 
-    strt_x: 0
-    strt_y: 0
+    strt_x: 00
+    strt_y: 00
 
     goal_x: self.center_x
     goal_y: self.center_y
@@ -463,9 +464,7 @@
 
     always_release:True
     orientation:'horizontal'
-    on_release:
-        if root.parent.parent.parent.children[0].target_type == "enemy":root.enemy_select();root.parent.parent.canvas.add(Line(points=[self.strt_x, self.strt_y, self.goal_x-self.tri_x,self.strt_y],width=12))
-
+    on_release:root.enemy_select()
 
     canvas.before:
         Color:

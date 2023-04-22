@@ -3,7 +3,7 @@ from operator import attrgetter
 import random
 from Character import Character as Ch
 
-from MartialArts import MartialArts as MA
+
 
 turn = 0
 

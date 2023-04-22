@@ -18,6 +18,9 @@ from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
 from Player import Player as Pl
 from Character import Character as Ch
+from Character import Hero as He
+from Character import Enemy as En
+
 from time import sleep
 from sounds.Sounds import Sounds as Se
 from Battle import Battle
