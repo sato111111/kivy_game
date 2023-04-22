@@ -352,19 +352,23 @@
 <BattleField@BoxLayout>:
     id:battle_field
 
-<HeroCard@ButtonBehavior+BoxLayout>:
+<HeroCard>:
     particle:particle
     hero_card:hero_card
     id:hero_card
-    name:name
-    hpbar:hpbar
-    selected_arts:selected_arts
+
+    selected_art:selected_art
     card_pos_x:root.center_x
     card_pos_y:root.center_y
     is_active:"standby"
-    is_arts:"standby"
-    atk:1
-    spd:1
+
+    atk:0
+    pro:0
+    spd:0
+    name:name
+    hpbar:hpbar
+
+
 
 
     orientation:'vertical'
@@ -372,8 +376,7 @@
 
     always_release: True
 
-    is_status:0
-    on_press:
+    on_release:
         #root.test_hp_damage(10)
         root.arts_on_display()
 
@@ -407,7 +410,7 @@
 
     Cstmlbl_fs15:
         size_hint:1,.2
-        id:selected_arts
+        id:selected_art
         text:'(技名スペース)'
     Label:
         id:particle
@@ -424,8 +427,8 @@
 
 
 <StatusBar@Cstmlbl_fs15>:
-    max:250
-    now:250
+    max:1
+    now:1
     canvas.before:
         #オーバーゲージ(緑)は実装時に記述しないとエラーになる
         Color:
@@ -441,15 +444,19 @@
             width:1.3
 
 
-<EnemyCard>:
-    enemy_field:enemy_field
-    id:enemy_field
+<EnemyCard@SuperCard>:
 
-    enemy_name:enemy_name
-    enemy_status:enemy_status
+    enemy_card:enemy_card
+    id:enemy_card
+    name:name
+    hpbar:hpbar
 
-    _:1
+    atk:1
+    pro:1
+    spd:1
 
+
+    padding:50
     strt_x: 00
     strt_y: 00
 
@@ -463,8 +470,9 @@
 
 
     always_release:True
-    orientation:'horizontal'
-    on_release:root.enemy_select()
+    orientation:'vertical'
+    on_release:
+        root.enemy_select()
 
     canvas.before:
         Color:
@@ -473,17 +481,23 @@
             pos:self.pos
             size:self.size
 
+    Cstmlbl_fs15:
+        bs_fntsz:26
+        id:name
+        size_hint:1,.2
 
-    BoxLayout:
-        orientation:'vertical'
+    StatusBar:
+        id:hpbar
+        size_hint:1,.12
+        canvas.before:
+            Color:
+                rgb:.3,.7,.3
+            Rectangle:#緑ゲージ
+                pos:self.pos
+                # 参考:px * (最大HP - 現在のHP) / 最大HP
+                size:self.width-self.width*(self.max - self.now)/self.max, self.height
 
-        Cstmlbl_fs20:
-            size_hint:1,.15
-            id:enemy_name
 
-        Cstmlbl_fs15:
-            size_hint:1,.85
-            id:enemy_status
 
 
 <HeroesField,EnemiesField>:

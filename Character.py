@@ -6,6 +6,7 @@ class Character:
     """キャラクター"""
 
     def __init__(self, characters_no: int):
+        self.IS_TYPE = None
         chara = characters_dict_list[characters_no]
         self.no = chara["no"]
         self.name = chara["name"]
@@ -23,8 +24,6 @@ class Character:
 
         self.weapon = Weapon(1)
         self.armor = Armor(2)
-
-        self.is_hero = False
 
     def status(self):
         return f"『{self.name} 』　hp:{(math.floor(self.hp))} /  {math.floor(self.maxhp)}ATK:{self.atk}SPD: {self.spd}"
@@ -113,16 +112,23 @@ class Armor:
 
 
 class Hero(Character):
+
     def __init__(self, characters_no: int):
         super().__init__(characters_no)
-        self.is_hero = True
+        self.IS_TYPE = "HERO"
         self.select_art = None
         self.card_pos_x = ""
         self.card_pos_y = ""
 
 
-
 class Enemy(Character):
+
     def __init__(self, characters_no: int):
         super().__init__(characters_no)
+        self.IS_TYPE = "ENEMY"
         self.is_pos = []
+
+
+class Empty:
+    def __init__(self):
+        self.IS_TYPE = "EMPTY"

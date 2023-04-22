@@ -14,10 +14,9 @@ from kivy.core.window import Window
 from kivy.config import Config
 from kivy.uix.widget import Widget
 
-
 from kivy.uix.popup import Popup
 from Player import Player as Pl
-from Character import Character as Ch
+from Character import Character as Ch, Empty
 from Character import Hero as He
 from Character import Enemy as En
 
@@ -25,6 +24,8 @@ from time import sleep
 from sounds.Sounds import Sounds as Se
 from Battle import Battle
 import dictionaries as di
+
+
 class MainScreen(Screen):
     pass
 
@@ -52,7 +53,6 @@ class SuperTopLayout(GridLayout):
 class SuperButtonLayout(GridLayout):
     """MainWidget,BattleWidget専用の継承クラス"""
 
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.se = Se()
@@ -76,6 +76,28 @@ class SuperButtonLayout(GridLayout):
 
     def text_change(self, t):
         self.se.se_play("correct.mp3")
+
+
+class SuperCard(ButtonBehavior, BoxLayout):
+    def __init__(self, character: Ch, **kwargs):
+        super().__init__(**kwargs)
+        self.chara = character
+       # self.chara.card_no = card_no
+        self.name.text = self.chara.name_txt()
+        self.hpbar.max = self.chara.maxhp
+        self.hpbar.now = self.chara.hp
+        self.hpbar.text = f"HP:{self.chara.hp}/{self.chara.maxhp}"
+
+
+
+    def hpbar_update(self, damage=0):
+        # バー動作確認用の自傷ダメージ処理
+        if self.chara.hp > damage > 0:
+            self.chara.hp -= damage
+            self.hpbar.text = f"HP:{self.chara.hp}/{self.chara.maxhp}"
+        else:
+            self.chara.hp = 0
+            self.hpbar.text = f"HP:0/{self.chara.maxhp}"
 
 
 class MSettingScreen(Screen):
@@ -131,6 +153,7 @@ class EnemiesField(BoxLayout):
 class EmptySpace(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.chara = Empty()
 
 
 class PopupMenu(BoxLayout):
