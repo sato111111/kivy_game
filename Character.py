@@ -120,6 +120,7 @@ class Hero(Character):
         self.card_pos_x = ""
         self.card_pos_y = ""
 
+        self.selected_enemy = 0
 
 class Enemy(Character):
 

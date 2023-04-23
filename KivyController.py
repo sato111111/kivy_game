@@ -156,12 +156,13 @@ class BattleButtonLayout(SuperButtonLayout):
         self.max_ac_count = 0
         self.current_turn = 0
         self.acted_list = []
+        self.srtd_actd_lst = []
         self.select_hero = ""
         self.enemy_party = debug.enemies_generate(En)
         Clock.schedule_once(self.update_btn)
 
     def order_list_insert(self):
-        [self.parent.children[3].children[0].add_widget(chara_in_widget) for chara_in_widget in
+        [self.parent.action_list.order_space.add_widget(chara_in_widget) for chara_in_widget in
          [OrderListHero(c) if c.IS_TYPE is "HERO" else OrderListEnemy(c) for c in
           sorted([c for c in self.player.party + self.enemy_party if c != "empty"], reverse=True,
                  key=attrgetter("spd"))]]
@@ -220,34 +221,29 @@ class BattleButtonLayout(SuperButtonLayout):
         # ソートしたアクション決定済みリスト
         self.srtd_actd_lst = sorted(self.acted_list, reverse=True, key=attrgetter("spd"))
         # これからアクションを起こすリスト
+
         for c in self.srtd_actd_lst:
-            print(c.IS_TYPE)
             if c.IS_TYPE == "HERO":
                 c.hp -= 10
-                print(c.hp)
-            else:
-                pass
 
         Clock.schedule_once(self.hero_hp_update)
 
         return self.turn_end()
 
     def hero_hp_update(self, dt):
-        for i, c in enumerate(self.player.party,start=1):
+        for i in range(3):
             hc = self.parent.children[2].children[0].children[i]
-            if hasattr(hc.chara, "hp"):
+
+            if hasattr(hc, "chara"):
                 if hc.chara.hp > 0:
 
                     hc.hpbar.now = hc.chara.hp
                     hc.hpbar.text = f"HP:{hc.chara.hp}/{hc.chara.maxhp}"
                 else:
                     hc.hpbar.text = f"HP:0/{hc.chara.maxhp}"
-            else:
-                pass
 
     def turn_end(self, ):
 
-        print("turn_end1")
         # self.parent.parent.canvas.remove()
 
         for i in range(3):
@@ -256,11 +252,6 @@ class BattleButtonLayout(SuperButtonLayout):
             if pc2c.hero_card.is_active != "down" and pc2c.hero_card.is_active != "empty":
                 pc2c.hero_card.is_active = "standby"
                 pc2c.hero_card.selected_art.text = '(技名スペース)'
-                print("turn_end2")
-
-            else:
-                pass
-        print("turn_end3")
 
         self.acted_list = []
         self.select_hero = ObjectProperty("")
@@ -288,22 +279,29 @@ class BattleButtonLayout(SuperButtonLayout):
     def btn_ins(self, ):
 
         """HeroFieldに(右側)にカードを挿入"""
-        left_pt_full = self.player.party + ["", ""]  # 先に空(empty)を挿入
-        print(
-        [self.parent.children[2].children[0].add_widget(chara_in_widget) for chara_in_widget in
-         [HeroCard(h) if h != "" else EmptySpace() for h in left_pt_full[0:3]]]
-        )
+        hero_full_pt = self.player.party + ["", ""]  # 先に空(empty)を挿入
+
+        [self.parent.battle_field.heroes_field.add_widget(h_in_widget) for h_in_widget in
+         [HeroCard(h) if h != "" else EmptySpace() for h in hero_full_pt[0:3]]]
+
         # 右画面にEnemyボタンを挿入
 
-        bfr_pt_full = self.enemy_party + ["", ""]  # 後続に空を挿入
+        enemy_full_pt = self.enemy_party + ["", ""]  # 後続に空を挿入
 
-        [self.parent.children[2].children[2].add_widget(chara_in_widget) for chara_in_widget in
-         [EnemyCard(e) if e != "" else EmptySpace() for e in bfr_pt_full[0:3]]]
+        [self.parent.battle_field.enemies_field.add_widget(e_in_widget) for e_in_widget in
+         [EnemyCard(e) if e != "" else EmptySpace() for e in enemy_full_pt[0:3]]]
+
+class HeroesField(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+    def set_party(self):
+        pass
 
 
 class HeroCard(SuperCard):
     """is HeroCard表示設定"""
-
 
     def __init__(self, character: He, **kwargs):
         super().__init__(character, **kwargs)
@@ -392,14 +390,9 @@ class EnemyCard(SuperCard):
 
         pppc = self.parent.parent.parent.children[0]
 
-        if hasattr(pppc.select_hero.select_art, "target_type"):
+        if hasattr(pppc.select_hero, "select_art") and hasattr(pppc.select_hero.select_art, "target_type"):
             if pppc.select_hero.select_art.target_type == "enemy" and pppc.select_hero.select_art is not None:
                 r = self.enemy_selected()
-            else:
-                pass
-
-        else:
-            pass
         return r
 
     def enemy_selected(self):

@@ -82,13 +82,11 @@ class SuperCard(ButtonBehavior, BoxLayout):
     def __init__(self, character: Ch, **kwargs):
         super().__init__(**kwargs)
         self.chara = character
-       # self.chara.card_no = card_no
+        # self.chara.card_no = card_no
         self.name.text = self.chara.name_txt()
         self.hpbar.max = self.chara.maxhp
         self.hpbar.now = self.chara.hp
         self.hpbar.text = f"HP:{self.chara.hp}/{self.chara.maxhp}"
-
-
 
     def hpbar_update(self, damage=0):
         # バー動作確認用の自傷ダメージ処理
@@ -140,9 +138,6 @@ class OrderListEnemy(BoxLayout):
         self.chara_name.text = character.name_txt()
 
 
-class HeroesField(BoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
 
 class EnemiesField(BoxLayout):
@@ -151,9 +146,7 @@ class EnemiesField(BoxLayout):
 
 
 class EmptySpace(Widget):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.chara = Empty()
+    pass
 
 
 class PopupMenu(BoxLayout):

@@ -113,6 +113,9 @@
         size_hint: 1, .08
 
 <BattleTopLayout>: ####parent
+    battle_field:battle_field
+    action_list:action_list
+
     id:battle_top_layout
     menu_button:menu_button
     top_label:top_label
@@ -171,6 +174,7 @@
             on_release:root.menu_btn()
     #######################################children[1]
     BoxLayout:
+        order_space:order_space
         id:action_list
         orientation:'vertical'
 
@@ -217,6 +221,7 @@
             size_hint:1,.4
             text:""
         OrderSpace:
+            id:order_space
     ########################################children[3]
     #戦闘の流れ
         #ターン開始
@@ -230,26 +235,23 @@
         #ターン終了
 
     BattleField:###[0]
-        battle_field:battle_field
         id:battle_field
-
 
         orientation: 'horizontal' if root.height >= root.width else 'vertical'
 
-        heroes_filed:heroes_filed
+        heroes_field:heroes_field
         enemies_field:enemies_field
 
-        HeroesField:
-
+        EnemiesField:
+            id: enemies_field
             orientation: 'vertical' if root.height >= root.width else 'horizontal'
-            id: heroes_filed
 
         BoxLayout:
             id:party_status
             size_hint:1,.72
 
-        EnemiesField:
-            id: enemies_field
+        HeroesField:
+            id: heroes_field
             orientation: 'vertical' if root.height >= root.width else 'horizontal'
 
             ######################################children[4]
