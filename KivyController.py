@@ -232,7 +232,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
     def hero_hp_update(self, dt):
         for i in range(3):
-            hc = self.parent.children[2].children[0].children[i]
+            hc = self.parent.battle_field.heroes_field.children[i]
 
             if hasattr(hc, "chara"):
                 if hc.chara.hp > 0:
