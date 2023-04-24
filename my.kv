@@ -473,8 +473,13 @@
 
     always_release:True
     orientation:'vertical'
+    on_press:
+        if root.chara.hp <= 0: self.state = 'normal'
+
     on_release:
-        root.enemy_select()
+        if root.chara.hp > 0: root.enemy_select()
+
+
 
     canvas.before:
         Color:

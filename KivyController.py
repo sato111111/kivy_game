@@ -197,6 +197,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
             self.select_hero_card.select_art = self.select_hero_card.chara.arts_list[btn_int]
             r = self.target_select()
+
         except AttributeError:
             pass
         return r
@@ -209,7 +210,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
         # パーティの人数確認=============================
         for i in range(3):
-            if hc.children[i].hero_card.is_active != "empty":
+            if hc.children[i].is_active != "empty":
                 hero_count += 1
             else:
                 pass
@@ -224,8 +225,9 @@ class BattleButtonLayout(SuperButtonLayout):
         # これからアクションを起こすリスト
 
         for c in self.srtd_actd_lst:
-            if c.IS_TYPE == "HERO":
-                c.hp -= 10
+            self.enemy_party[c.enemy_target_no].hp -= c.select_art.normal_attack()
+
+
 
         return self.turn_end()
 
@@ -239,6 +241,7 @@ class BattleButtonLayout(SuperButtonLayout):
             if pc2c.is_active != "down" and pc2c.is_active != "empty":
                 pc2c.is_active = "standby"
                 pc2c.selected_art.text = '(技名スペース)'
+                self.select_hero_card.select_art = None
 
         self.acted_list = []
         self.select_hero_card = ObjectProperty("")
@@ -271,16 +274,18 @@ class BattleButtonLayout(SuperButtonLayout):
         [self.parent.battle_field.heroes_field.add_widget(h_in_widget) for h_in_widget in
          [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:3]]]
 
-        for i in range(3):
-            self.parent.battle_field.heroes_field.children[i].party_no = i
+        for i,l in enumerate([2,1,0]):
+            self.parent.battle_field.heroes_field.children[i].party_no = l
         # 右画面にEnemyボタンを挿入
 
         enemy_full_pt = self.enemy_party + ["", ""]  # 後続に空を挿入
 
         [self.parent.battle_field.enemies_field.add_widget(e_in_widget) for e_in_widget in
          [EnemyCard(e) if e != "" else EmptyCard() for e in enemy_full_pt[0:3]]]
-        for i in range(3):
-            self.parent.battle_field.enemies_field.children[i].party_no = i
+
+        for i,l in enumerate([2,1,0]):
+            self.parent.battle_field.enemies_field.children[i].party_no = l
+            print(self.parent.battle_field.enemies_field.children[i].party_no)
 
 
 class HeroesField(BoxLayout):
@@ -293,9 +298,10 @@ class HeroCard(SuperCard):
 
     def __init__(self, character: He, **kwargs):
         super().__init__(character, **kwargs)
-
-        self.selected_art.text = '(技名スペース)'
         self.select_art = None
+        self.selected_art.text = '(技名スペース)'
+        self.card_pos_x = ""
+        self.card_pos_y = ""
 
         # standby=行動前,active=行動中(原則一人),acted=行動済
 
@@ -384,11 +390,11 @@ class EnemyCard(SuperCard):
                 r = self.enemy_selected()
         return r
 
-    def enemy_selected(self):
+    def enemy_selected(self,):
         ppc = self.parent.parent.children[0]
         pppc = self.parent.parent.parent.children[0]
         empty = ""
-
+        print(self.chara.name)
         for i in range(3):
             hc = ppc.children[i]
             r = None
@@ -402,13 +408,14 @@ class EnemyCard(SuperCard):
                 # self.parent.parent.parent.parent.canvas.add(Line(points=[self.strt_x, self.strt_y, self.goal_x - self.tri_x, self.goal_y], width=7),)
 
                 hc.selected_art.text = f"『　{pppc.select_hero_card.select_art.name}　』"
-                pppc.select_hero_card.select_art = None
-                hc.chara.enemy_target_no = self.party_no
+                #pppc.select_hero_card.select_art = None
+                print(self.party_no)
+                hc.enemy_target_no = self.party_no
                 hc.is_active = "acted"
 
                 for btn in ["a", "b", "c"]:
                     pppc.ids[f"{btn}_btn"].text = empty
-                pppc.acted_list.append(pppc.select_hero_card.chara)
+                pppc.acted_list.append(pppc.select_hero_card)
             else:
                 pass
         if pppc.is_ac_count == pppc.max_ac_count:

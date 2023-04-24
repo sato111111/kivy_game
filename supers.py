@@ -87,7 +87,7 @@ class SuperCard(ButtonBehavior, BoxLayout):
         self.name.text = self.chara.name_txt()
         self.hpbar.max = self.chara.maxhp
         self.hpbar.now = self.chara.hp
-        self.hpbar.text = f"HP:{self.chara.hp}/{self.chara.maxhp}"
+        self.hpbar.text = f"HP:{int(self.chara.hp)}/{self.chara.maxhp}"
         self.is_active = "standby"
         self.hero_target_no = None
         self.enemy_target_no = None
@@ -97,9 +97,11 @@ class SuperCard(ButtonBehavior, BoxLayout):
         if self.chara.hp > 0:
 
             self.hpbar.now = self.chara.hp
-            self.hpbar.text = f"HP:{self.chara.hp}/{self.chara.maxhp}"
+            self.hpbar.text = f"HP:{int(self.chara.hp)}/{self.chara.maxhp}"
         else:
-            self.hpbar.text = f"HP:0/{self.chara.maxhp}"
+            self.chara.hp = 0
+            self.hpbar.now = self.chara.hp
+            self.hpbar.text = f"HP:{int(self.chara.hp)}/{self.chara.maxhp}"
 
 
 

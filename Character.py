@@ -70,10 +70,10 @@ class MartialArt:
         # テキスト
         self.text = art["text"]
 
-    def normal_attack(self, target):
-        dam = self.dam_atk
-        target.hp -= dam
-        return dam, self.arts_name
+    def normal_attack(self):
+        damage = self.damage_rate * (self.atk_impact+self.spd_impact)
+
+        return damage
 
     def power_attack(self, target):
         dam = self.dam_atk
@@ -116,10 +116,6 @@ class Hero(Character):
     def __init__(self, characters_no: int):
         super().__init__(characters_no)
         self.IS_TYPE = "HERO"
-        self.select_art = None
-        self.card_pos_x = ""
-        self.card_pos_y = ""
-
         self.selected_enemy = 0
 
 class Enemy(Character):
