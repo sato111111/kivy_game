@@ -321,7 +321,7 @@
         id:a_btn
         text:'A'
         on_release:
-            if root.select_hero != "":root.action_exe(0)
+            if root.select_hero_card != "":root.action_exe(0)
             else:root.pushed_btn(self.text)
 
     MenuButton:
@@ -329,7 +329,7 @@
         id:b_btn
         text:'B'
         on_release:
-            if root.select_hero != "":root.action_exe(1)
+            if root.select_hero_card != "":root.action_exe(1)
             else: root.pushed_btn(self.text)
 
     MenuButton:
@@ -337,7 +337,7 @@
         id:c_btn
         text:'C'
         on_release:
-            if root.select_hero != "":root.action_exe(2)
+            if root.select_hero_card != "":root.action_exe(2)
             else: root.pushed_btn(self.text)
 
 
@@ -657,9 +657,9 @@
     Cstmlbl_fs15:
         bs_fntsz:26
         id:chara_name
-<EmptySpace>:
-    hero_card:hero_card
-    id:hero_card
+<EmptyCard>:
+    hero_card:empty_card
+    id:empty_card
     is_active:'empty'
 
 

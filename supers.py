@@ -81,21 +81,26 @@ class SuperButtonLayout(GridLayout):
 class SuperCard(ButtonBehavior, BoxLayout):
     def __init__(self, character: Ch, **kwargs):
         super().__init__(**kwargs)
+        self.party_no = None
         self.chara = character
         # self.chara.card_no = card_no
         self.name.text = self.chara.name_txt()
         self.hpbar.max = self.chara.maxhp
         self.hpbar.now = self.chara.hp
         self.hpbar.text = f"HP:{self.chara.hp}/{self.chara.maxhp}"
+        self.is_active = "standby"
+        self.hero_target_no = None
+        self.enemy_target_no = None
+        Clock.schedule_interval(self.hpbar_update, 0.25)
 
-    def hpbar_update(self, damage=0):
-        # バー動作確認用の自傷ダメージ処理
-        if self.chara.hp > damage > 0:
-            self.chara.hp -= damage
+    def hpbar_update(self, dt):
+        if self.chara.hp > 0:
+
+            self.hpbar.now = self.chara.hp
             self.hpbar.text = f"HP:{self.chara.hp}/{self.chara.maxhp}"
         else:
-            self.chara.hp = 0
             self.hpbar.text = f"HP:0/{self.chara.maxhp}"
+
 
 
 class MSettingScreen(Screen):
@@ -145,8 +150,11 @@ class EnemiesField(BoxLayout):
         super().__init__(**kwargs)
 
 
-class EmptySpace(Widget):
-    pass
+class EmptyCard(Widget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.party_no = None
+
 
 
 class PopupMenu(BoxLayout):

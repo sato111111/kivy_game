@@ -157,7 +157,7 @@ class BattleButtonLayout(SuperButtonLayout):
         self.current_turn = 0
         self.acted_list = []
         self.srtd_actd_lst = []
-        self.select_hero = ""
+        self.select_hero_card = ""
         self.enemy_party = debug.enemies_generate(En)
         Clock.schedule_once(self.update_btn)
 
@@ -183,9 +183,10 @@ class BattleButtonLayout(SuperButtonLayout):
     def text_change(self, t, ):
         super().text_change(t)
         if t == "戦闘開始(テスト)":
-            self.btn_ins()
+            self.card_insert()
             self.order_list_insert()
             self.turn_start()
+
 
         elif t == "戦闘実行(本番)":
             pass
@@ -194,7 +195,7 @@ class BattleButtonLayout(SuperButtonLayout):
         r = None
         try:
 
-            self.select_hero.select_art = self.select_hero.arts_list[btn_int]
+            self.select_hero_card.select_art = self.select_hero_card.chara.arts_list[btn_int]
             r = self.target_select()
         except AttributeError:
             pass
@@ -226,21 +227,7 @@ class BattleButtonLayout(SuperButtonLayout):
             if c.IS_TYPE == "HERO":
                 c.hp -= 10
 
-        Clock.schedule_once(self.hero_hp_update)
-
         return self.turn_end()
-
-    def hero_hp_update(self, dt):
-        for i in range(3):
-            hc = self.parent.battle_field.heroes_field.children[i]
-
-            if hasattr(hc, "chara"):
-                if hc.chara.hp > 0:
-
-                    hc.hpbar.now = hc.chara.hp
-                    hc.hpbar.text = f"HP:{hc.chara.hp}/{hc.chara.maxhp}"
-                else:
-                    hc.hpbar.text = f"HP:0/{hc.chara.maxhp}"
 
     def turn_end(self, ):
 
@@ -249,55 +236,56 @@ class BattleButtonLayout(SuperButtonLayout):
         for i in range(3):
             pc2c = self.parent.children[2].children[0].children[i]
 
-            if pc2c.hero_card.is_active != "down" and pc2c.hero_card.is_active != "empty":
-                pc2c.hero_card.is_active = "standby"
-                pc2c.hero_card.selected_art.text = '(技名スペース)'
+            if pc2c.is_active != "down" and pc2c.is_active != "empty":
+                pc2c.is_active = "standby"
+                pc2c.selected_art.text = '(技名スペース)'
 
         self.acted_list = []
-        self.select_hero = ObjectProperty("")
+        self.select_hero_card = ObjectProperty("")
         return self.turn_start()
 
     def target_select(self, ):
         txt_lbl = ""
-        if self.select_hero.select_art.target_type == "enemy":
+        if self.select_hero_card.select_art.target_type == "enemy":
             txt_lbl = "対象の敵を選択しよう"
 
             # canvasで選択対象を光らせるメソッド追加予定
-        elif self.select_hero.select_art.target_type == "enemies":
+        elif self.select_hero_card.select_art.target_type == "enemies":
             pass
 
-        elif self.select_hero.select_art.target_type == "hero":
+        elif self.select_hero_card.select_art.target_type == "hero":
             txt_lbl = "対象を選択しよう"
             self.enemy_target_state = 1
             # canvasで選択対象を光らせるメソッド追加予定
-        elif self.select_hero.select_art.target_type == "heroes":
+        elif self.select_hero_card.select_art.target_type == "heroes":
             pass
         else:
             pass
         self.parent.text_label.text = txt_lbl
 
-    def btn_ins(self, ):
+    def card_insert(self, ):
 
         """HeroFieldに(右側)にカードを挿入"""
         hero_full_pt = self.player.party + ["", ""]  # 先に空(empty)を挿入
 
         [self.parent.battle_field.heroes_field.add_widget(h_in_widget) for h_in_widget in
-         [HeroCard(h) if h != "" else EmptySpace() for h in hero_full_pt[0:3]]]
+         [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:3]]]
 
+        for i in range(3):
+            self.parent.battle_field.heroes_field.children[i].party_no = i
         # 右画面にEnemyボタンを挿入
 
         enemy_full_pt = self.enemy_party + ["", ""]  # 後続に空を挿入
 
         [self.parent.battle_field.enemies_field.add_widget(e_in_widget) for e_in_widget in
-         [EnemyCard(e) if e != "" else EmptySpace() for e in enemy_full_pt[0:3]]]
+         [EnemyCard(e) if e != "" else EmptyCard() for e in enemy_full_pt[0:3]]]
+        for i in range(3):
+            self.parent.battle_field.enemies_field.children[i].party_no = i
+
 
 class HeroesField(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-
-    def set_party(self):
-        pass
 
 
 class HeroCard(SuperCard):
@@ -305,9 +293,10 @@ class HeroCard(SuperCard):
 
     def __init__(self, character: He, **kwargs):
         super().__init__(character, **kwargs)
-        self.hero_card.is_active = "standby"
 
         self.selected_art.text = '(技名スペース)'
+        self.select_art = None
+
         # standby=行動前,active=行動中(原則一人),acted=行動済
 
         Clock.schedule_interval(self.particle_animation, 2)
@@ -351,18 +340,18 @@ class HeroCard(SuperCard):
     def arts_on_display(self):
         # HeroCardを選択した後にBattleButtonLayoutのButtonのテキストにHeroの技(Arts)を表示させる処理
 
-        if self.hero_card.is_active != "acted":
+        if self.is_active != "acted":
 
             for i in range(3):
                 if self.parent.children[i].is_active == "active":
                     self.parent.children[i].is_active = "standby"
 
-            self.hero_card.is_active = "active"
+            self.is_active = "active"
 
             # BattleButtonLayoutへ送る
 
             ppp = self.parent.parent.parent
-            ppp.children[0].select_hero = self.chara
+            ppp.children[0].select_hero_card = self
             # ppp.children[0].hero_action_art = self.chara.arts_list
             # Buttonの名称を技名に変更
             for i, btn in enumerate(["a", "b", "c"]):
@@ -371,7 +360,7 @@ class HeroCard(SuperCard):
 
             ppp.text_label.text = "技を選択してください。"
 
-        elif self.hero_card.is_active == "down":
+        elif self.is_active == "down":
             pass
         else:
             pass
@@ -390,8 +379,8 @@ class EnemyCard(SuperCard):
 
         pppc = self.parent.parent.parent.children[0]
 
-        if hasattr(pppc.select_hero, "select_art") and hasattr(pppc.select_hero.select_art, "target_type"):
-            if pppc.select_hero.select_art.target_type == "enemy" and pppc.select_hero.select_art is not None:
+        if hasattr(pppc.select_hero_card, "select_art") and hasattr(pppc.select_hero_card.select_art, "target_type"):
+            if pppc.select_hero_card.select_art.target_type == "enemy" and pppc.select_hero_card.select_art is not None:
                 r = self.enemy_selected()
         return r
 
@@ -403,26 +392,25 @@ class EnemyCard(SuperCard):
         for i in range(3):
             hc = ppc.children[i]
             r = None
-            if hc.hero_card.is_active is "active":
+            if hc.is_active is "active":
 
                 pppc.is_ac_count += 1
 
-                self.strt_x = hc.hero_card.card_pos_x
-                self.strt_y = hc.hero_card.card_pos_y
-                # BattleScreenにCanvasを追加
+                self.strt_x = hc.card_pos_x
+                self.strt_y = hc.card_pos_y
+                # BattleScreenにCanvasを追加しLineを描写
                 # self.parent.parent.parent.parent.canvas.add(Line(points=[self.strt_x, self.strt_y, self.goal_x - self.tri_x, self.goal_y], width=7),)
 
-                hc.selected_art.text = f"『　{pppc.select_hero.select_art.name}　』"
-                pppc.select_hero.select_art = None
-                hc.hero_card.is_active = "acted"
+                hc.selected_art.text = f"『　{pppc.select_hero_card.select_art.name}　』"
+                pppc.select_hero_card.select_art = None
+                hc.chara.enemy_target_no = self.party_no
+                hc.is_active = "acted"
 
                 for btn in ["a", "b", "c"]:
                     pppc.ids[f"{btn}_btn"].text = empty
-                pppc.acted_list.append(pppc.select_hero)
-
+                pppc.acted_list.append(pppc.select_hero_card.chara)
             else:
                 pass
-        # if pa.children[0].hero_card.is_active == "acted" and pa.children[1].hero_card.is_active == "acted" and pa.children[2].hero_card.is_active == "acted":
         if pppc.is_ac_count == pppc.max_ac_count:
             r = pppc.action_start()
             pppc.is_ac_count = 0
