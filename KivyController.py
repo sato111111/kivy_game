@@ -116,6 +116,7 @@ class BattleTopLayout(SuperTopLayout):
 
         self.parent.manager.current = "main_screen"
         self.clear_widgets()
+        self.remove_widget(self)
         self.parent.add_widget(BattleTopLayout("リセットしました"))
         self.parent.children[0].add_widget(BattleButtonLayout())
 
@@ -162,10 +163,17 @@ class BattleButtonLayout(SuperButtonLayout):
         Clock.schedule_once(self.update_btn)
 
     def order_list_insert(self):
-        [self.parent.action_list.order_space.add_widget(chara_in_widget) for chara_in_widget in
-         [OrderListHero(c) if c.IS_TYPE is "HERO" else OrderListEnemy(c) for c in
-          sorted([c for c in self.player.party + self.enemy_party if c != "empty"], reverse=True,
-                 key=attrgetter("spd"))]]
+        sort_order_list = sorted(
+            [c for c in [c_not_empty for c_not_empty in self.player.party + self.enemy_party if c_not_empty != "empty"]
+             if c.hp > 0], reverse=True,
+            key=attrgetter("spd"))
+
+        [self.parent.action_list.order_space.add_widget(chara_card) for chara_card in
+         [OrderListHero(c) if c.IS_TYPE is "HERO" else OrderListEnemy(c) for c in sort_order_list]]
+
+    def order_list_update(self):
+        self.parent.action_list.order_space.clear_widgets()
+        self.order_list_insert()
 
     def update_btn(self, dt):
         self.a_btn.text = "戦闘開始(テスト)"
@@ -220,19 +228,35 @@ class BattleButtonLayout(SuperButtonLayout):
     # == == == == == == == == == == == == == ==
 
     def action_start(self):
+
+        r = None
         # ソートしたアクション決定済みリスト
         self.srtd_actd_lst = sorted(self.acted_list, reverse=True, key=attrgetter("spd"))
         # これからアクションを起こすリスト
 
         for c in self.srtd_actd_lst:
-            self.enemy_party[c.enemy_target_no].hp -= c.select_art.normal_attack()
+            e = self.parent.battle_field.enemies_field.children[c.enemy_target_no]
+            e.hp -= c.select_art.normal_attack()
 
+        return self.party_down_checker()
 
+    def party_down_checker(self):
+        for i, _ in enumerate(self.enemy_party):
+            e = self.parent.battle_field.enemies_field.children[i]
+            if hasattr(e, "hp_bar"):
+                if e.hp_bar.now != e.hp:
+                    return Clock.schedule_once(self.p)
+        for i, _ in enumerate(self.enemy_party):
+            e = self.parent.battle_field.enemies_field.children[i]
+            if hasattr(e, "hp_bar"):
 
-        return self.turn_end()
+                if e.hp_bar.now > 0:
+                    return self.turn_end()
+        return self.battle_end()
 
-    def turn_end(self, ):
-
+    def p(self,dt):
+        return self.party_down_checker()
+    def turn_end(self,):
         # self.parent.parent.canvas.remove()
 
         for i in range(3):
@@ -242,10 +266,13 @@ class BattleButtonLayout(SuperButtonLayout):
                 pc2c.is_active = "standby"
                 pc2c.selected_art.text = '(技名スペース)'
                 self.select_hero_card.select_art = None
-
+        self.order_list_update()
         self.acted_list = []
         self.select_hero_card = ObjectProperty("")
         return self.turn_start()
+
+    def battle_end(self):
+        self.parent.reset()
 
     def target_select(self, ):
         txt_lbl = ""
@@ -274,8 +301,8 @@ class BattleButtonLayout(SuperButtonLayout):
         [self.parent.battle_field.heroes_field.add_widget(h_in_widget) for h_in_widget in
          [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:3]]]
 
-        for i,l in enumerate([2,1,0]):
-            self.parent.battle_field.heroes_field.children[i].party_no = l
+        for i, _ in enumerate([2, 1, 0]):
+            self.parent.battle_field.heroes_field.children[i].party_no = i
         # 右画面にEnemyボタンを挿入
 
         enemy_full_pt = self.enemy_party + ["", ""]  # 後続に空を挿入
@@ -283,9 +310,8 @@ class BattleButtonLayout(SuperButtonLayout):
         [self.parent.battle_field.enemies_field.add_widget(e_in_widget) for e_in_widget in
          [EnemyCard(e) if e != "" else EmptyCard() for e in enemy_full_pt[0:3]]]
 
-        for i,l in enumerate([2,1,0]):
-            self.parent.battle_field.enemies_field.children[i].party_no = l
-            print(self.parent.battle_field.enemies_field.children[i].party_no)
+        for i, _ in enumerate([0,1,2]):
+            self.parent.battle_field.enemies_field.children[i].party_no = i
 
 
 class HeroesField(BoxLayout):
@@ -375,6 +401,7 @@ class HeroCard(SuperCard):
 class EnemyCard(SuperCard):
     """IS_TYPE = ENEMY 表示設定"""
 
+
     def __init__(self, character: En, **kwargs):
         super().__init__(character, **kwargs)
         self.strt_x = 0
@@ -390,7 +417,7 @@ class EnemyCard(SuperCard):
                 r = self.enemy_selected()
         return r
 
-    def enemy_selected(self,):
+    def enemy_selected(self, ):
         ppc = self.parent.parent.children[0]
         pppc = self.parent.parent.parent.children[0]
         empty = ""
@@ -408,7 +435,7 @@ class EnemyCard(SuperCard):
                 # self.parent.parent.parent.parent.canvas.add(Line(points=[self.strt_x, self.strt_y, self.goal_x - self.tri_x, self.goal_y], width=7),)
 
                 hc.selected_art.text = f"『　{pppc.select_hero_card.select_art.name}　』"
-                #pppc.select_hero_card.select_art = None
+                # pppc.select_hero_card.select_art = None
                 print(self.party_no)
                 hc.enemy_target_no = self.party_no
                 hc.is_active = "acted"

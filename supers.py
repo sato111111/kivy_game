@@ -4,7 +4,7 @@ import japanize_kivy  # import するだけで機能する。
 from kivy.animation import Animation
 from kivy.app import App
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty, BooleanProperty
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
@@ -79,30 +79,44 @@ class SuperButtonLayout(GridLayout):
 
 
 class SuperCard(ButtonBehavior, BoxLayout):
+    hp = NumericProperty(None)
+    hp_bar = ObjectProperty(None)
+    hero_target_no = NumericProperty(None)
+    enemy_target_no = NumericProperty(None)
+    is_down = BooleanProperty(False)
+    is_active = StringProperty("standby")
+
     def __init__(self, character: Ch, **kwargs):
         super().__init__(**kwargs)
         self.party_no = None
         self.chara = character
-        # self.chara.card_no = card_no
+        self.hp = self.chara.hp
         self.name.text = self.chara.name_txt()
-        self.hpbar.max = self.chara.maxhp
-        self.hpbar.now = self.chara.hp
-        self.hpbar.text = f"HP:{int(self.chara.hp)}/{self.chara.maxhp}"
-        self.is_active = "standby"
-        self.hero_target_no = None
-        self.enemy_target_no = None
-        Clock.schedule_interval(self.hpbar_update, 0.25)
+        self.hp_bar.max = self.chara.maxhp
+        self.hp_bar.now = self.hp
+        self.hp_bar.text = f"HP:{int(self.hp)}/{self.chara.maxhp}"
 
-    def hpbar_update(self, dt):
-        if self.chara.hp > 0:
+    def on_hp(self,instance,value):
 
-            self.hpbar.now = self.chara.hp
-            self.hpbar.text = f"HP:{int(self.chara.hp)}/{self.chara.maxhp}"
-        else:
-            self.chara.hp = 0
-            self.hpbar.now = self.chara.hp
-            self.hpbar.text = f"HP:{int(self.chara.hp)}/{self.chara.maxhp}"
+        if value != self.hp_bar.now:
+            if value <= 0:
+                self.hp = 0
+            self.chara.hp = self.hp
+            Clock.schedule_interval(self.update_hp_bar, 0.01)
+    def update_hp_bar(self, dt):
 
+        if self.hp == self.hp_bar.now:
+            Clock.unschedule(self.update_hp_bar)
+            return
+        if self.hp <= 0:
+            self.hp = 0
+        if self.hp_bar.now > self.hp:
+            self.hp_bar.now -= 1
+        elif self.hp_bar.now < self.hp:
+            self.hp_bar.now += 1
+
+
+        self.hp_bar.text = f"HP:{int(self.hp_bar.now)}/{self.chara.maxhp}"
 
 
 class MSettingScreen(Screen):

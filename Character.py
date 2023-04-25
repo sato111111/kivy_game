@@ -1,7 +1,6 @@
 import math
 from dictionaries import *
 
-
 class Character:
     """キャラクター"""
 
@@ -71,7 +70,7 @@ class MartialArt:
         self.text = art["text"]
 
     def normal_attack(self):
-        damage = self.damage_rate * (self.atk_impact+self.spd_impact)
+        damage = (self.damage_rate * (self.atk_impact+self.spd_impact))*10
 
         return damage
 

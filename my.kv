@@ -368,9 +368,7 @@
     pro:0
     spd:0
     name:name
-    hpbar:hpbar
-
-
+    hp_bar:hp_bar
 
 
     orientation:'vertical'
@@ -400,7 +398,7 @@
         size_hint:1,.2
 
     StatusBar:
-        id:hpbar
+        id:hp_bar
         size_hint:1,.12
         canvas.before:
             Color:
@@ -451,7 +449,7 @@
     enemy_card:enemy_card
     id:enemy_card
     name:name
-    hpbar:hpbar
+    hp_bar:hp_bar
 
     atk:1
     pro:1
@@ -474,10 +472,10 @@
     always_release:True
     orientation:'vertical'
     on_press:
-        if root.chara.hp <= 0: self.state = 'normal'
+        if root.hp <= 0: self.state = 'normal'
 
     on_release:
-        if root.chara.hp > 0: root.enemy_select()
+        if root.hp > 0: root.enemy_select()
 
 
 
@@ -494,7 +492,7 @@
         size_hint:1,.2
 
     StatusBar:
-        id:hpbar
+        id:hp_bar
         size_hint:1,.12
         canvas.before:
             Color:
