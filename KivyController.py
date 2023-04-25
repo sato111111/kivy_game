@@ -246,12 +246,13 @@ class BattleButtonLayout(SuperButtonLayout):
             if hasattr(e, "hp_bar"):
                 if e.hp_bar.now != e.hp:
                     return Clock.schedule_once(self.p)
+
         for i, _ in enumerate(self.enemy_party):
             e = self.parent.battle_field.enemies_field.children[i]
             if hasattr(e, "hp_bar"):
-
                 if e.hp_bar.now > 0:
                     return self.turn_end()
+
         return self.battle_end()
 
     def p(self,dt):
