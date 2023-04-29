@@ -25,6 +25,13 @@ from sounds.Sounds import Sounds as Se
 from Battle import Battle
 import dictionaries as di
 
+def my_decorator(func):
+    def wrapper(*args,**kwargs):
+        print(f"LOG: {func.__name__} was called with {args} and {kwargs}")
+
+        return func(*args, **kwargs)
+    return wrapper
+
 
 class MainScreen(Screen):
     pass
@@ -32,6 +39,7 @@ class MainScreen(Screen):
 
 class BattleScreen(Screen):
     pass
+
 
 
 class SuperTopLayout(GridLayout):
@@ -79,44 +87,55 @@ class SuperButtonLayout(GridLayout):
 
 
 class SuperCard(ButtonBehavior, BoxLayout):
+    chara=ObjectProperty()
     hp = NumericProperty(None)
     hp_bar = ObjectProperty(None)
     hero_target_no = NumericProperty(None)
     enemy_target_no = NumericProperty(None)
     is_down = BooleanProperty(False)
+    is_start = BooleanProperty(True)
     is_active = StringProperty("standby")
+    select_art = ObjectProperty("")
 
     def __init__(self, character: Ch, **kwargs):
         super().__init__(**kwargs)
         self.party_no = None
         self.chara = character
-        self.hp = self.chara.hp
         self.name.text = self.chara.name_txt()
+        self.hp = self.chara.hp
         self.hp_bar.max = self.chara.maxhp
-        self.hp_bar.now = self.hp
+        self.hp_bar.now = self.chara.hp
         self.hp_bar.text = f"HP:{int(self.hp)}/{self.chara.maxhp}"
 
-    def on_hp(self,instance,value):
+    def on_hp(self, instance, value):
+        if self.is_start != True:
+            if value != self.hp_bar.now:
+                if value <= 0:
+                    self.hp = 0
+                self.chara.hp = self.hp
+                Clock.schedule_interval(self.update_hp_bar, 0.01)
+        else:
+            self.is_start = False
 
-        if value != self.hp_bar.now:
-            if value <= 0:
-                self.hp = 0
-            self.chara.hp = self.hp
-            Clock.schedule_interval(self.update_hp_bar, 0.01)
+
     def update_hp_bar(self, dt):
 
-        if self.hp == self.hp_bar.now:
-            Clock.unschedule(self.update_hp_bar)
-            return
         if self.hp <= 0:
             self.hp = 0
+        if self.hp == self.hp_bar.now:
+            Clock.unschedule(self.update_hp_bar)
+            return self.parent.party_checker()
+
+
         if self.hp_bar.now > self.hp:
             self.hp_bar.now -= 1
         elif self.hp_bar.now < self.hp:
             self.hp_bar.now += 1
+        elif self.hp_bar.now == 0:
+            self.is_down = True
 
 
-        self.hp_bar.text = f"HP:{int(self.hp_bar.now)}/{self.chara.maxhp}"
+        self.hp_bar.text = f"HP:{int(self.hp_bar.now)}/{self.hp_bar.max}"
 
 
 class MSettingScreen(Screen):
@@ -159,9 +178,45 @@ class OrderListEnemy(BoxLayout):
         self.chara_name.text = character.name_txt()
 
 
+class SuperField(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def get_party_checker(self, dt):
+        return self.party_checker()
+
+    def party_checker(self):
+        cckr = 0
+        for i in range(3):
+            party = self.children[i]
+            if hasattr(party, "hp_bar"):
+                if int(party.hp_bar.now) != int(party.hp):
+                    cckr += 1
+        if cckr != 0:
+            return Clock.schedule_once(self.get_party_checker)
+        elif cckr == 0:
+            return self.party_down_checker()
+
+    def party_down_checker(self):
+        alive = 0
+        for i in range(3):
+            party = self.children[i]
+            if hasattr(party, "hp_bar"):
+                if party.hp_bar.now > 0:
+                    alive += 1
+        if alive >= 1:
+            self.parent.parent.parent.parent.children[0].children[0].children[0].turn_end_call_count += 1
+            return
+        elif alive == 0:
+            if hasattr(self.parent.parent,"parent"):
+                self.parent.parent.parent.parent.children[0].children[0].children[0].battle_end()
+            return
 
 
-class EnemiesField(BoxLayout):
+
+
+class EnemiesField(SuperField):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -170,7 +225,6 @@ class EmptyCard(Widget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.party_no = None
-
 
 
 class PopupMenu(BoxLayout):

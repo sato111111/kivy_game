@@ -353,7 +353,7 @@
             rgb:[1,1,1]
 <BattleField@BoxLayout>:
     id:battle_field
-
+<SuperField@BoxLayout>:
 <HeroCard>:
     particle:particle
     hero_card:hero_card
@@ -375,10 +375,13 @@
     source:"image/txtr.png"
 
     always_release: True
+    on_press:
+        if root.is_active == 'acted': self.state = 'normal'
+
 
     on_release:
-        #root.test_hp_damage(10)
         root.arts_on_display()
+
 
         root.parent.parent.children[1].strt_x = self.center_x
         root.parent.parent.children[1].strt_y = self.center_y
@@ -476,8 +479,6 @@
 
     on_release:
         if root.hp > 0: root.enemy_select()
-
-
 
     canvas.before:
         Color:
