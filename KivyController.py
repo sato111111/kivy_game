@@ -32,32 +32,16 @@ class KiApp(App):
 
     def env_execute(self, ):  # 手続き型凝集、スタンプ結合
 
-        sm = ScreenManager()  # スクリーンマネージャを起動
-        [
-            sm.add_widget(screen) for screen in
-            (
-                BattleScreen(name="battle_screen"),
-                MainScreen(name="main_screen"),
-                BSettingScreen(name="b_s_s"),
-                MSettingScreen(name="m_s_s"),
-            )
-        ]
+        sm = RootScreenManager()  # スクリーンマネージャを起動
 
-        btl = BattleTopLayout()
-        mtl = MainTopLayout()
 
-        bl = BattleButtonLayout()
-        ml = MainButtonLayout()
-
-        self.screen_layout(sm, btl, bl)
-        self.screen_layout(sm, mtl, ml, "main_screen")
 
         return sm
 
-    def screen_layout(self, sm, top_layout, btn_layout, current_screen=None):
+    def screen_layout(self, sm, top_layout, btn_layout=None, current_screen=None):
         sm.current = current_screen if current_screen is not None else None
         sm.children[0].add_widget(top_layout)
-        sm.children[0].children[0].add_widget(btn_layout)
+        sm.children[0].children[0].add_widget(btn_layout) if btn_layout != None else None
 
     def on_pause(self):
         """ ポーズ時のイベント """
@@ -75,12 +59,35 @@ class KiApp(App):
 
     def on_start(self):
         return
+class RootScreenManager(ScreenManager):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.__ms__ = "main_screen"
+        self.__bs__ = "battle_screen"
+        self.__ss__ = "setting_screen"
+        self.__create__()
+    def __create__(self):
+        btl = BattleTopLayout()
+        bbl = BattleButtonLayout()
+        mtl = MainTopLayout()
 
+        self.add_widget(BattleScreen(name=self.__bs__))
+        self.children[0].add_widget(btl)
+        self.children[0].children[0].add_widget(bbl)
 
+        self.add_widget(MainScreen(name=self.__ms__))
+        self.current = self.__ms__
+        self.children[0].add_widget(mtl)
+        self.add_widget(SettingScreen(name=self.__ss__))
+    def change_setting_screen(self,current_screen_name:str):
+        self.transition = WipeTransition()
+        self.current = self.__ss__
+        self.current_screen.before_screen = current_screen_name
 class MainTopLayout(SuperTopLayout):
     def __init__(self, tplbl="", **kwargs):
         super().__init__(**kwargs)
         self.top_label.text = tplbl if tplbl != "" else "ゲームスタート"
+        self.current_screen_name = "main_screen"
 
     def top_menu_btn(self):
         self.reset()
@@ -88,17 +95,21 @@ class MainTopLayout(SuperTopLayout):
     def reset(self):
         self.clear_widgets()
         self.parent.add_widget(MainTopLayout("リセットしました"))
-        self.parent.children[0].add_widget(MainButtonLayout())
+
+
+
+    def battle_start(self):
+        self.change_screen("battle_screen")
+
 
     def menu_btn(self):
         # setting_screen呼び出し
-        self.change_screen("m_s_s")
-
-
+        self.change_setting_screen()
 class BattleTopLayout(SuperTopLayout):
     def __init__(self, tplbl="", **kwargs):
         super().__init__(**kwargs)
         self.top_label.text = tplbl if tplbl != "" else "ゲームスタート"
+        self.current_screen_name = "battle_screen"
 
     def top_menu_btn(self):
         content = PopupMenu(popup_no=self.popup_close, popup_yes=self.popup_run_away)
@@ -122,28 +133,7 @@ class BattleTopLayout(SuperTopLayout):
 
     def menu_btn(self):  # 機能的凝集、スタンプ結合
         # setting_screen呼び出し
-        self.change_screen("b_s_s")
-
-
-class MainButtonLayout(SuperButtonLayout):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def text_change(self, t):
-        super().text_change(t)
-
-        if t == "A":
-            self.parent.change_screen("battle_screen")
-
-        elif t == "B":
-            pass
-
-        elif t == "C":
-            pass
-
-        else:
-            pass
-
+        self.change_setting_screen()
 
 class BattleButtonLayout(SuperButtonLayout):
     """戦闘用レイアウトBattleScreenに紐付ける"""
@@ -155,6 +145,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.PARTY_MAX_PEOPLE = 3
         self.current_turn = 1
         self.player = g_player
         self.is_ac_count = 0
@@ -231,7 +222,7 @@ class BattleButtonLayout(SuperButtonLayout):
         hc = self.parent.children[2].children[0]
         self.current_turn_call_count += 1
         # パーティの人数確認=============================
-        for i in range(3):
+        for i in range(self.PARTY_MAX_PEOPLE):
             if hc.children[i].is_active != "empty":
                 hero_count += 1
             else:
@@ -258,7 +249,7 @@ class BattleButtonLayout(SuperButtonLayout):
     def turn_end(self, ):
         # self.parent.parent.canvas.remove()
 
-        for i in range(3):
+        for i in range(self.PARTY_MAX_PEOPLE):
             pc2c = self.parent.children[2].children[0].children[i]
 
             if pc2c.is_active != "down" and pc2c.is_active != "empty":
@@ -298,7 +289,7 @@ class BattleButtonLayout(SuperButtonLayout):
         hero_full_pt = self.player.party + ["", ""]  # 先に空(empty)を挿入
 
         [self.parent.battle_field.heroes_field.add_widget(h_in_widget) for h_in_widget in
-         [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:3]]]
+         [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:self.PARTY_MAX_PEOPLE]]]
 
         for i, _ in enumerate([2, 1, 0]):
             self.parent.battle_field.heroes_field.children[i].party_no = i
@@ -307,7 +298,7 @@ class BattleButtonLayout(SuperButtonLayout):
         enemy_full_pt = self.enemy_party + ["", ""]  # 後続に空を挿入
 
         [self.parent.battle_field.enemies_field.add_widget(e_in_widget) for e_in_widget in
-         [EnemyCard(e) if e != "" else EmptyCard() for e in enemy_full_pt[0:3]]]
+         [EnemyCard(e) if e != "" else EmptyCard() for e in enemy_full_pt[0:self.PARTY_MAX_PEOPLE]]]
 
         for i, _ in enumerate([0, 1, 2]):
             self.parent.battle_field.enemies_field.children[i].party_no = i
@@ -372,7 +363,7 @@ class HeroCard(SuperCard):
         ppp = self.parent.parent.parent
         if self.is_active != "acted":
 
-            for i in range(3):
+            for i in range(self.PARTY_MAX_PEOPLE):
                 if self.parent.children[i].is_active == "active":
                     self.parent.children[i].is_active = "standby"
                     if hasattr(ppp.children[0], "select_hero_card"):
@@ -419,7 +410,7 @@ class EnemyCard(SuperCard):
         pppc = self.parent.parent.parent.children[0]
         empty = ""
         print(self.chara.name)
-        for i in range(3):
+        for i in range(self.PARTY_MAX_PEOPLE):
             hc = ppc.children[i]
             r = None
             if hc.is_active is "active":
