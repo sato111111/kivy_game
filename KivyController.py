@@ -201,7 +201,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
     def text_change(self, t, ):
         super().text_change(t)
-        if t == "戦闘開始(テスト)":
+        if t is "戦闘開始(テスト)":
             self.card_insert()
             self.order_list_insert()
             self.turn_start()
@@ -223,7 +223,7 @@ class BattleButtonLayout(SuperButtonLayout):
         # パーティの人数確認=============================
 
         for i in range(G_PARTY_MEMBER_MAX):
-            if hc.children[i].is_active != "EMPTY":
+            if hc.children[i].is_active != "EMPTY"or hc.children[i].is_active !="DOWN":
                 hero_count += 1
             else:
                 pass
@@ -243,9 +243,9 @@ class BattleButtonLayout(SuperButtonLayout):
         self.turn_end_call_count = 0
         ###デバッグ用にenemyの行動を強制決定↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
         for enemy_card in self.parent.battle_field.enemies_field.children:
-            if hasattr(enemy_card,"hp"):
-                if enemy_card.hp>0:
-                    enemy_card.select_art = enemy_card.chara.arts_list[random.randrange(2)+1]
+            if hasattr(enemy_card, "hp"):
+                if enemy_card.hp > 0:
+                    enemy_card.select_art = enemy_card.chara.arts_list[random.randrange(2) + 1]
                     enemy_card.visitor_target_no = 0
                     self.acted_list.append(enemy_card)
 
@@ -476,7 +476,6 @@ class EnemyCard(SuperCard):
 
         else:
             pass
-
 
 
 class BattleField(BoxLayout):

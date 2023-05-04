@@ -115,7 +115,6 @@ class Hero(Character):
     def __init__(self, characters_no: int):
         super().__init__(characters_no)
         self.IS_TYPE = "HERO"
-        #self.selected_enemy = 0
 
 class Enemy(Character):
 
