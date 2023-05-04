@@ -25,31 +25,38 @@ from sounds.Sounds import Sounds as Se
 from Battle import Battle
 import dictionaries as di
 
-
-a="""def my_decorator(func):
+a = """def my_decorator(func):
     def wrapper(*args, **kwargs):
         print(f"LOG: {func.__name__} was called with {args} and {kwargs}")
 
         return func(*args, **kwargs)
 
     return wrapper"""
+global G_PARTY_MEMBER_MAX
+G_PARTY_MEMBER_MAX = 3
 
 
 class MainScreen(Screen):
     pass
 
+
 class BattleScreen(Screen):
     pass
+
+
 class SettingScreen(Screen):
     """メニューボタンを押すとメニューが開ける。
         下記にはkvファイルに登録した関数の処理を記述"""
     before_screen = StringProperty("")
+
     def __init__(self, **kw):
         super().__init__(**kw)
         self.before_screen = ""
+
     def main_slide(self):
         self.parent.transition = WipeTransition()
         self.parent.current = self.before_screen
+
 
 class SuperTopLayout(GridLayout):
     def __init__(self, **kwargs):
@@ -65,8 +72,7 @@ class SuperTopLayout(GridLayout):
         self.parent.manager.transition = WipeTransition()
         self.parent.manager.current = screen_name
 
-
-    def change_setting_screen(self,):
+    def change_setting_screen(self, ):
         self.parent.manager.change_setting_screen(self.current_screen_name)
 
 
@@ -100,18 +106,16 @@ class SuperButtonLayout(GridLayout):
 
 class SuperCard(ButtonBehavior, BoxLayout):
     chara = ObjectProperty()
-    card_delete = BooleanProperty(None)
+    alive = BooleanProperty(None)
     hp = NumericProperty(None)
-    hp_bar = ObjectProperty(None)
-    hero_target_no = NumericProperty(None)
-    enemy_target_no = NumericProperty(None)
-    is_down = BooleanProperty(False)
-    is_start = BooleanProperty(True)
-    is_active = StringProperty("standby")
+    own_target_no = NumericProperty(None)
+    visitor_target_no = NumericProperty(None)
+    is_active = StringProperty("START")
     select_art = ObjectProperty("")
 
     def __init__(self, character: Ch, **kwargs):
         super().__init__(**kwargs)
+        global G_PARTY_MEMBER_MAX
         self.party_no = None
         self.chara = character
         self.name.text = self.chara.name_txt()
@@ -119,33 +123,33 @@ class SuperCard(ButtonBehavior, BoxLayout):
         self.hp_bar.max = self.chara.maxhp
         self.hp_bar.now = self.chara.hp
         self.hp_bar.text = f"HP:{int(self.hp)}/{self.chara.maxhp}"
-        self.PARTY_MAX_PEOPLE = 3
-
     def on_hp(self, instance, value):
-        if self.is_start != True:
+        if self.is_active is "START":
+            self.is_active = "STANDBY"
+        else:
             if value != self.hp_bar.now:
                 if value <= 0:
                     self.hp = 0
                 self.chara.hp = self.hp
                 Clock.schedule_interval(self.update_hp_bar, 0.01)
-        else:
-            self.is_start = False
+
+
 
     def update_hp_bar(self, dt):
-
+    
         if self.hp <= 0:
             self.hp = 0
         if self.hp == self.hp_bar.now:
             Clock.unschedule(self.update_hp_bar)
             return self.parent.party_hp_checker()
-
+    
         if self.hp_bar.now > self.hp:
             self.hp_bar.now -= 1
         elif self.hp_bar.now < self.hp:
             self.hp_bar.now += 1
         elif self.hp_bar.now == 0:
-            self.is_down = True
-
+            self.is_active = "DOWN"
+    
         self.hp_bar.text = f"HP:{int(self.hp_bar.now)}/{self.hp_bar.max}"
 
 
@@ -153,15 +157,13 @@ class SettingScreen(Screen):
     """メニューボタンを押すとメニューが開ける。
         下記にはkvファイルに登録した関数の処理を記述"""
 
-
     def __init__(self, **kw):
         super().__init__(**kw)
         self.before_screen = ""
+
     def change_screen_before(self):
         self.manager.transition = WipeTransition()
         self.manager.current = self.before_screen
-
-
 
 
 class OrderListHero(BoxLayout):
@@ -184,14 +186,14 @@ class SuperField(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.PARTY_MAX_PEOPLE = 3
 
     def get_party_checker(self, dt):
         return self.party_hp_checker()
 
     def party_hp_checker(self):
         cckr = 0
-        for i in range(self.PARTY_MAX_PEOPLE):
+        global G_PARTY_MEMBER_MAX
+        for i in range(G_PARTY_MEMBER_MAX):
             party = self.children[i]
             if hasattr(party, "hp_bar"):
                 if int(party.hp_bar.now) != int(party.hp):
@@ -203,13 +205,15 @@ class SuperField(BoxLayout):
 
     def party_down_checker(self):
         alive = 0
-        for i in range(self.PARTY_MAX_PEOPLE):
+        global G_PARTY_MEMBER_MAX
+        for i in range(G_PARTY_MEMBER_MAX):
             party = self.children[i]
             if hasattr(party, "hp_bar"):
                 if party.hp_bar.now > 0:
                     alive += 1
         if alive >= 1:
-            self.parent.parent.parent.parent.children[0].children[0].children[0].turn_end_call_count += 1
+            if hasattr(self.parent.parent, "parent"):
+                self.parent.parent.parent.parent.children[0].children[0].children[0].turn_end_call_count += 1
             return
         elif alive == 0:
             if hasattr(self.parent.parent, "parent"):

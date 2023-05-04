@@ -22,7 +22,7 @@ class KiApp(App):
         he = [
             He(-1),
             He(-1),
-            # He(-1)
+            He(-1)
         ]
 
         global g_player
@@ -33,8 +33,6 @@ class KiApp(App):
     def env_execute(self, ):  # 手続き型凝集、スタンプ結合
 
         sm = RootScreenManager()  # スクリーンマネージャを起動
-
-
 
         return sm
 
@@ -59,6 +57,8 @@ class KiApp(App):
 
     def on_start(self):
         return
+
+
 class RootScreenManager(ScreenManager):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -66,6 +66,7 @@ class RootScreenManager(ScreenManager):
         self.__bs__ = "battle_screen"
         self.__ss__ = "setting_screen"
         self.__create__()
+
     def __create__(self):
         btl = BattleTopLayout()
         bbl = BattleButtonLayout()
@@ -79,10 +80,13 @@ class RootScreenManager(ScreenManager):
         self.current = self.__ms__
         self.children[0].add_widget(mtl)
         self.add_widget(SettingScreen(name=self.__ss__))
-    def change_setting_screen(self,current_screen_name:str):
+
+    def change_setting_screen(self, current_screen_name: str):
         self.transition = WipeTransition()
         self.current = self.__ss__
         self.current_screen.before_screen = current_screen_name
+
+
 class MainTopLayout(SuperTopLayout):
     def __init__(self, tplbl="", **kwargs):
         super().__init__(**kwargs)
@@ -96,15 +100,14 @@ class MainTopLayout(SuperTopLayout):
         self.clear_widgets()
         self.parent.add_widget(MainTopLayout("リセットしました"))
 
-
-
     def battle_start(self):
         self.change_screen("battle_screen")
-
 
     def menu_btn(self):
         # setting_screen呼び出し
         self.change_setting_screen()
+
+
 class BattleTopLayout(SuperTopLayout):
     def __init__(self, tplbl="", **kwargs):
         super().__init__(**kwargs)
@@ -135,28 +138,29 @@ class BattleTopLayout(SuperTopLayout):
         # setting_screen呼び出し
         self.change_setting_screen()
 
+
 class BattleButtonLayout(SuperButtonLayout):
     """戦闘用レイアウトBattleScreenに紐付ける"""
     global g_player
     global g_battle_party
+    global G_PARTY_MEMBER_MAX
     current_turn_call_count = NumericProperty(0)
     turn_end_call_count = NumericProperty(0)
     select_hero_card = ObjectProperty("")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.PARTY_MAX_PEOPLE = 3
+
         self.current_turn = 1
         self.player = g_player
         self.is_ac_count = 0
         self.max_ac_count = 0
         self.acted_list = []
-        self.srtd_actd_lst = []
+        self.sorted_acted_lst = []
         self.enemy_party = debug.enemies_generate(En)
-        Clock.schedule_once(self.update_btn)
+        self.DEBUG_BTN()
 
     def on_turn_end_call_count(self, instance, value):
-        print(f"1{value}")
 
         if value == 1:
             self.turn_end()
@@ -164,8 +168,6 @@ class BattleButtonLayout(SuperButtonLayout):
             pass
 
     def on_current_turn_call_count(self, instance, value):
-        print(f"2{value}")
-
         if value < 1:
             self.current_turn += 1
         else:
@@ -173,7 +175,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
     def order_list_insert(self):
         sort_order_list = sorted(
-            [c for c in [c_not_empty for c_not_empty in self.player.party + self.enemy_party if c_not_empty != "empty"]
+            [c for c in [c_not_empty for c_not_empty in self.player.party + self.enemy_party if c_not_empty != "EMPTY"]
              if c.hp > 0], reverse=True,
             key=attrgetter("spd"))
 
@@ -184,12 +186,12 @@ class BattleButtonLayout(SuperButtonLayout):
         self.parent.action_list.order_space.clear_widgets()
         self.order_list_insert()
 
-    def update_btn(self, dt):
+    def DEBUG_BTN(self):
         self.a_btn.text = "戦闘開始(テスト)"
         self.b_btn.text = "(未実装)"
         self.c_btn.text = "(未実装)"
 
-    def update_battle_text(self, dt):
+    def update_battle_text(self):
         self.current_turn_call_count += 1
         self.parent.top_label.text = "戦闘：" + str(self.current_turn) + "ターン目"
         self.parent.text_label.text = "行動したいキャラクターを選択してください"
@@ -211,19 +213,17 @@ class BattleButtonLayout(SuperButtonLayout):
     def action_exe(self, btn_int, ):
 
         self.select_hero_card.select_art = self.select_hero_card.chara.arts_list[btn_int]
-        r = self.target_select()
-
-        return r
+        return self.target_select()
 
     def turn_start(self):
-
-        Clock.schedule_once(self.update_battle_text)
+        self.update_battle_text()
         hero_count = 0
         hc = self.parent.children[2].children[0]
         self.current_turn_call_count += 1
         # パーティの人数確認=============================
-        for i in range(self.PARTY_MAX_PEOPLE):
-            if hc.children[i].is_active != "empty":
+
+        for i in range(G_PARTY_MEMBER_MAX):
+            if hc.children[i].is_active != "EMPTY":
                 hero_count += 1
             else:
                 pass
@@ -233,27 +233,45 @@ class BattleButtonLayout(SuperButtonLayout):
     # == == == == == == == == == == == == == ==
 
     def action_start(self):
+        """
+        各種カウントの初期化
+        current_turn_call_count ：ターン数経過の呼び出したが重複しないようにする
+        turn_end_call_count ：turn_endの呼び出したが重複しないようにする
+        :return:
+        """
         self.current_turn_call_count = 0
         self.turn_end_call_count = 0
-        r = None
-        # ソートしたアクション決定済みリスト
-        self.srtd_actd_lst = sorted(self.acted_list, reverse=True, key=attrgetter("spd"))
-        # これからアクションを起こすリスト
+        ###デバッグ用にenemyの行動を強制決定↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+        for enemy_card in self.parent.battle_field.enemies_field.children:
+            if hasattr(enemy_card,"hp"):
+                if enemy_card.hp>0:
+                    enemy_card.select_art = enemy_card.chara.arts_list[random.randrange(2)+1]
+                    enemy_card.visitor_target_no = 0
+                    self.acted_list.append(enemy_card)
 
-        for c in self.srtd_actd_lst:
-            e = self.parent.battle_field.enemies_field.children[c.enemy_target_no]
-            e.hp -= c.select_art.normal_attack()
+        ###デバッグ用↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
-        # return self.party_checker()
+        # 素早さ順にアクションを起こすようにリストをソート
+        self.sorted_acted_lst = sorted(self.acted_list, reverse=True, key=attrgetter("spd"))
+
+        # アクションスタート
+
+        for c in self.sorted_acted_lst:
+            if c.chara.IS_TYPE is "HERO":
+                e = self.parent.battle_field.enemies_field.children[c.visitor_target_no]
+                e.hp -= c.select_art.normal_attack()
+            if c.chara.IS_TYPE is not "HERO":
+                h = self.parent.battle_field.heroes_field.children[c.visitor_target_no]
+                h.hp -= c.select_art.normal_attack()
 
     def turn_end(self, ):
         # self.parent.parent.canvas.remove()
 
-        for i in range(self.PARTY_MAX_PEOPLE):
+        for i in range(G_PARTY_MEMBER_MAX):
             pc2c = self.parent.children[2].children[0].children[i]
 
-            if pc2c.is_active != "down" and pc2c.is_active != "empty":
-                pc2c.is_active = "standby"
+            if pc2c.is_active != "DOWN" and pc2c.is_active != "EMPTY":
+                pc2c.is_active = "STANDBY"
                 pc2c.selected_art.text = '(技名スペース)'
         self.order_list_update()
         self.acted_list = []
@@ -262,8 +280,8 @@ class BattleButtonLayout(SuperButtonLayout):
         return self.turn_start()
 
     def battle_end(self):
-        for i in range(self.PARTY_MAX_PEOPLE):
-            self.parent.battle_field.heroes_field.children[i].character_animation =False
+        for i in range(G_PARTY_MEMBER_MAX):
+            self.parent.battle_field.heroes_field.children[i].alive = False
         self.parent.reset()
 
     def target_select(self, ):
@@ -277,7 +295,6 @@ class BattleButtonLayout(SuperButtonLayout):
 
         elif self.select_hero_card.select_art.target_type == "hero":
             txt_lbl = "対象を選択しよう"
-            self.enemy_target_state = 1
             # canvasで選択対象を光らせるメソッド追加予定
         elif self.select_hero_card.select_art.target_type == "heroes":
             pass
@@ -291,7 +308,7 @@ class BattleButtonLayout(SuperButtonLayout):
         hero_full_pt = self.player.party + ["", ""]  # 先に空(empty)を挿入
 
         [self.parent.battle_field.heroes_field.add_widget(h_in_widget) for h_in_widget in
-         [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:self.PARTY_MAX_PEOPLE]]]
+         [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:G_PARTY_MEMBER_MAX]]]
 
         for i, _ in enumerate([2, 1, 0]):
             self.parent.battle_field.heroes_field.children[i].party_no = i
@@ -300,7 +317,7 @@ class BattleButtonLayout(SuperButtonLayout):
         enemy_full_pt = self.enemy_party + ["", ""]  # 後続に空を挿入
 
         [self.parent.battle_field.enemies_field.add_widget(e_in_widget) for e_in_widget in
-         [EnemyCard(e) if e != "" else EmptyCard() for e in enemy_full_pt[0:self.PARTY_MAX_PEOPLE]]]
+         [EnemyCard(e) if e != "" else EmptyCard() for e in enemy_full_pt[0:G_PARTY_MEMBER_MAX]]]
 
         for i, _ in enumerate([0, 1, 2]):
             self.parent.battle_field.enemies_field.children[i].party_no = i
@@ -319,12 +336,25 @@ class HeroCard(SuperCard):
         self.selected_art.text = '(技名スペース)'
         self.card_pos_x = ""
         self.card_pos_y = ""
+        self.alive = True
 
-        Clock.schedule_interval(self.particle_animation, 2)
         # standby=行動前,active=行動中(原則一人),acted=行動済
-    def on_card_delete(self,instance,bool):
-        if bool is False:
+
+    def on_alive(self, instance, bool):
+        if bool:
+            Clock.schedule_interval(self.particle_animation, 2)
+
+        elif bool is False:
             Clock.unschedule(self.particle_animation)
+
+    def on_is_active(self, instance, str: str):
+        """
+        :param instance:
+        :param str: activeステータス(standby,active,acted)がある。
+        :return: (standby=未選択状態なら)select_artを初期化
+        """
+        if str != "ACTIVE" and str != "ACTED":
+            self.select_art = ""
 
     def particle_animation(self, dt: object):
         prt = self.particle
@@ -363,29 +393,31 @@ class HeroCard(SuperCard):
         prt.part_c += 1
 
     def arts_on_display(self):
+        """
+        選択したHeroCard対象にreturnを返す
+        :return: BattleButtonLayoutのボタンに技名を表示する
+        """
         # HeroCardを選択した後にBattleButtonLayoutのButtonのテキストにHeroの技(Arts)を表示させる処理
         ppp = self.parent.parent.parent
-        if self.is_active != "acted":
+        if self.is_active is "STANDBY":
 
-            for i in range(self.PARTY_MAX_PEOPLE):
-                if self.parent.children[i].is_active == "active":
-                    self.parent.children[i].is_active = "standby"
-                    if hasattr(ppp.children[0], "select_hero_card"):
-                        ppp.children[0].select_hero_card.select_art = ""
+            for i in range(G_PARTY_MEMBER_MAX):
+                if self.parent.children[i].is_active == "ACTIVE":
+                    self.parent.children[i].is_active = "STANDBY"
 
-            self.is_active = "active"
+            self.is_active = "ACTIVE"
 
             # BattleButtonLayoutへ送る
 
             ppp.children[0].select_hero_card = self
             # Buttonの名称を技名に変更
             for i, btn in enumerate(["a", "b", "c"]):
-                ppp.children[0].ids[
-                    f"{btn}_btn"].text = f'技コスト:{self.chara.arts_list[i].cost} \n {self.chara.arts_list[i].name}'
+                c = self.chara.arts_list[i]
+                ppp.children[0].ids[f"{btn}_btn"].text = f'技コスト:{c.cost} \n {c.name}'
 
             ppp.text_label.text = "技を選択してください。"
 
-        elif self.is_active == "down":
+        elif self.is_active is "DOWN":
             pass
         else:
             pass
@@ -398,26 +430,27 @@ class EnemyCard(SuperCard):
         super().__init__(character, **kwargs)
         self.strt_x = 0
         self.strt_y = 0
+        global G_PARTY_MEMBER_MAX
 
     def enemy_select(self):
-        r = None
-
         pppc = self.parent.parent.parent.children[0]
-
         if hasattr(pppc.select_hero_card, "select_art") and hasattr(pppc.select_hero_card.select_art, "target_type"):
             if pppc.select_hero_card.select_art.target_type == "enemy" and pppc.select_hero_card.select_art is not None:
-                r = self.enemy_selected()
-        return r
+                return self.enemy_selected()
 
     def enemy_selected(self, ):
+        """
+
+
+        :return:
+        """
         ppc = self.parent.parent.children[0]
         pppc = self.parent.parent.parent.children[0]
         empty = ""
         print(self.chara.name)
-        for i in range(self.PARTY_MAX_PEOPLE):
+        for i in range(G_PARTY_MEMBER_MAX):
             hc = ppc.children[i]
-            r = None
-            if hc.is_active is "active":
+            if hc.is_active is "ACTIVE":
 
                 pppc.is_ac_count += 1
 
@@ -428,8 +461,8 @@ class EnemyCard(SuperCard):
 
                 hc.selected_art.text = f"『　{pppc.select_hero_card.select_art.name}　』"
 
-                hc.enemy_target_no = self.party_no
-                hc.is_active = "acted"
+                hc.visitor_target_no = self.party_no
+                hc.is_active = "ACTED"
 
                 for btn in ["a", "b", "c"]:
                     pppc.ids[f"{btn}_btn"].text = empty
@@ -437,12 +470,13 @@ class EnemyCard(SuperCard):
             else:
                 pass
         if pppc.is_ac_count == pppc.max_ac_count:
-            r = pppc.action_start()
             pppc.is_ac_count = 0
+
+            return pppc.action_start()
 
         else:
             pass
-            return r
+
 
 
 class BattleField(BoxLayout):

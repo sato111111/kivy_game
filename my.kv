@@ -341,7 +341,7 @@
     selected_art:selected_art
     card_pos_x:root.center_x
     card_pos_y:root.center_y
-    is_active:"standby"
+    #is_active:"START"
 
     atk:0
     pro:0
@@ -355,7 +355,7 @@
 
     always_release: True
     on_press:
-        if root.is_active == 'acted': self.state = 'normal'
+        if root.is_active == 'ACTED' and root.is_active == 'DOWN': self.state = 'normal'
 
 
     on_release:
@@ -644,7 +644,7 @@
 <EmptyCard>:
     hero_card:empty_card
     id:empty_card
-    is_active:'empty'
+    is_active:'EMPTY'
 
 
 <TestAA@ButtonBehavior+Label>:
