@@ -262,6 +262,8 @@ class BattleButtonLayout(SuperButtonLayout):
         return self.turn_start()
 
     def battle_end(self):
+        for i in range(self.PARTY_MAX_PEOPLE):
+            self.parent.battle_field.heroes_field.children[i].character_animation =False
         self.parent.reset()
 
     def target_select(self, ):
@@ -318,9 +320,11 @@ class HeroCard(SuperCard):
         self.card_pos_x = ""
         self.card_pos_y = ""
 
-        # standby=行動前,active=行動中(原則一人),acted=行動済
-
         Clock.schedule_interval(self.particle_animation, 2)
+        # standby=行動前,active=行動中(原則一人),acted=行動済
+    def on_card_delete(self,instance,bool):
+        if bool is False:
+            Clock.unschedule(self.particle_animation)
 
     def particle_animation(self, dt: object):
         prt = self.particle

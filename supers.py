@@ -100,6 +100,7 @@ class SuperButtonLayout(GridLayout):
 
 class SuperCard(ButtonBehavior, BoxLayout):
     chara = ObjectProperty()
+    card_delete = BooleanProperty(None)
     hp = NumericProperty(None)
     hp_bar = ObjectProperty(None)
     hero_target_no = NumericProperty(None)
