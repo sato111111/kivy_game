@@ -6,14 +6,14 @@ arts_dict_list = [
     {"no": 0, "name": "------", "target_type": "-------", "cost": 0, "attribute": "none", "damage_rate": 0,
      "skill_level": 0, "atk_impact": 0, "spd_impact": 0, "text": "------"},
 
-    {"no": 1, "name": "殴る", "target_type": "enemy", "cost": 1, "attribute": "none", "damage_rate": 1, "skill_level": 1,
+    {"no": 1, "name": "殴る", "target_type": "VISITOR", "cost": 1, "attribute": "none", "damage_rate": 1, "skill_level": 1,
      "atk_impact": 0.5, "spd_impact": 0.5, "text": "自分も痛い。", },
-    {"no": 2, "name": "蹴る", "target_type": "enemy", "cost": 1, "attribute": "none", "damage_rate": 1, "skill_level": 1,
+    {"no": 2, "name": "蹴る", "target_type": "VISITOR", "cost": 1, "attribute": "none", "damage_rate": 1, "skill_level": 1,
      "atk_impact": 0.5, "spd_impact": 0.5, "text": "(未実装)", },
-    {"no": 3, "name": "ずつく", "target_type": "enemy", "cost": 1, "attribute": "none", "damage_rate": 1, "skill_level": 1,
+    {"no": 3, "name": "ずつく", "target_type": "VISITOR", "cost": 1, "attribute": "none", "damage_rate": 1, "skill_level": 1,
      "atk_impact": 0.5, "spd_impact": 0.5, "text": "(未実装)",},
-    {"no": 99, "name": "テストアーツ", "target_type": "enemy", "cost": 0, "attribute": "none", "damage_rate": 1, "skill_level": 1,
-     "atk_impact": 10, "spd_impact": 10, "text": "テスト用artsZ",},
+    {"no": 99, "name": "テストアーツ", "target_type": "VISITOR", "cost": 0, "attribute": "none", "damage_rate": 1, "skill_level": 1,
+     "atk_impact": 10, "spd_impact": 10, "text": "テスト用arts",},
 
 ]
 

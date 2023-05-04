@@ -71,7 +71,6 @@ class MartialArt:
 
     def normal_attack(self):
         damage = (self.damage_rate * (self.atk_impact+self.spd_impact))*10
-
         return damage
 
     def power_attack(self, target):

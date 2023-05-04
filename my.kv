@@ -341,7 +341,6 @@
     selected_art:selected_art
     card_pos_x:root.center_x
     card_pos_y:root.center_y
-    #is_active:"START"
 
     atk:0
     pro:0
@@ -349,18 +348,16 @@
     name:name
     hp_bar:hp_bar
 
-
     orientation:'vertical'
     source:"image/txtr.png"
 
     always_release: True
-    on_press:
-        if root.is_active == 'ACTED' or root.is_active == 'DOWN': self.state = 'normal'
 
+    on_press:
+        if self.is_active is 'ACTED' or self.is_active is 'DOWN': self.state = 'normal'
 
     on_release:
         root.arts_on_display()
-
 
         root.parent.parent.children[1].strt_x = self.center_x
         root.parent.parent.children[1].strt_y = self.center_y
@@ -454,10 +451,10 @@
     always_release:True
     orientation:'vertical'
     on_press:
-        if root.hp <= 0: self.state = 'normal'
+        if self.hp_bar.now <= 0: self.state = 'normal'
 
     on_release:
-        if root.hp > 0: root.enemy_select()
+        if self.hp_bar.now > 0: self.enemy_select()
 
     canvas.before:
         Color:

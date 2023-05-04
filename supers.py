@@ -124,21 +124,23 @@ class SuperCard(ButtonBehavior, BoxLayout):
         self.hp_bar.now = self.chara.hp
         self.hp_bar.text = f"HP:{int(self.hp)}/{self.chara.maxhp}"
     def on_hp(self, instance, value):
-        if self.is_active is "START":
+        if self.hp == 0:
+            self.is_active = "DOWN"
+        elif self.is_active is "START":
             self.is_active = "STANDBY"
+
         else:
             if value != self.hp_bar.now:
                 if value <= 0:
                     self.hp = 0
+                    self.is_active = "DOWN"
+
                 self.chara.hp = self.hp
                 Clock.schedule_interval(self.update_hp_bar, 0.01)
 
 
 
     def update_hp_bar(self, dt):
-    
-        if self.hp <= 0:
-            self.hp = 0
         if self.hp == self.hp_bar.now:
             Clock.unschedule(self.update_hp_bar)
             return self.parent.party_hp_checker()
@@ -148,8 +150,7 @@ class SuperCard(ButtonBehavior, BoxLayout):
         elif self.hp_bar.now < self.hp:
             self.hp_bar.now += 1
         elif self.hp_bar.now == 0:
-            self.is_active = "DOWN"
-    
+            pass
         self.hp_bar.text = f"HP:{int(self.hp_bar.now)}/{self.hp_bar.max}"
 
 

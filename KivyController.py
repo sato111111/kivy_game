@@ -221,13 +221,12 @@ class BattleButtonLayout(SuperButtonLayout):
         hc = self.parent.children[2].children[0]
         self.current_turn_call_count += 1
         # パーティの人数確認=============================
-
         for i in range(G_PARTY_MEMBER_MAX):
-            if hc.children[i].is_active != "EMPTY"or hc.children[i].is_active !="DOWN":
-                hero_count += 1
-            else:
+            if hc.children[i].is_active is "EMPTY" or hc.children[i].is_active is "DOWN":
                 pass
-
+            else:
+                hero_count += 1
+        print(f"hero_count:{hero_count}")
         self.max_ac_count = hero_count
 
     # == == == == == == == == == == == == == ==
@@ -245,7 +244,8 @@ class BattleButtonLayout(SuperButtonLayout):
         for enemy_card in self.parent.battle_field.enemies_field.children:
             if hasattr(enemy_card, "hp"):
                 if enemy_card.hp > 0:
-                    enemy_card.select_art = enemy_card.chara.arts_list[random.randrange(2) + 1]
+                    # enemy_card.select_art = enemy_card.chara.arts_list[random.randrange(2) + 1]
+                    enemy_card.select_art = enemy_card.chara.arts_list[0]
                     enemy_card.visitor_target_no = 0
                     self.acted_list.append(enemy_card)
 
@@ -260,7 +260,7 @@ class BattleButtonLayout(SuperButtonLayout):
             if c.chara.IS_TYPE is "HERO":
                 e = self.parent.battle_field.enemies_field.children[c.visitor_target_no]
                 e.hp -= c.select_art.normal_attack()
-            if c.chara.IS_TYPE is not "HERO":
+            elif c.chara.IS_TYPE is not "HERO":
                 h = self.parent.battle_field.heroes_field.children[c.visitor_target_no]
                 h.hp -= c.select_art.normal_attack()
 
@@ -272,7 +272,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
             if pc2c.is_active != "DOWN" and pc2c.is_active != "EMPTY":
                 pc2c.is_active = "STANDBY"
-                pc2c.selected_art.text = '(技名スペース)'
+                pc2c.selected_art.text = ''
         self.order_list_update()
         self.acted_list = []
         self.select_hero_card = ""
@@ -286,17 +286,17 @@ class BattleButtonLayout(SuperButtonLayout):
 
     def target_select(self, ):
         txt_lbl = ""
-        if self.select_hero_card.select_art.target_type == "enemy":
+        if self.select_hero_card.select_art.target_type == "VISITOR":
             txt_lbl = "対象の敵を選択しよう"
 
             # canvasで選択対象を光らせるメソッド追加予定
-        elif self.select_hero_card.select_art.target_type == "enemies":
+        elif self.select_hero_card.select_art.target_type == "VISITORS":
             pass
 
-        elif self.select_hero_card.select_art.target_type == "hero":
+        elif self.select_hero_card.select_art.target_type == "OWN":
             txt_lbl = "対象を選択しよう"
             # canvasで選択対象を光らせるメソッド追加予定
-        elif self.select_hero_card.select_art.target_type == "heroes":
+        elif self.select_hero_card.select_art.target_type == "OWNS":
             pass
         else:
             pass
@@ -333,30 +333,32 @@ class HeroCard(SuperCard):
 
     def __init__(self, character: He, **kwargs):
         super().__init__(character, **kwargs)
-        self.selected_art.text = '(技名スペース)'
+        self.selected_art.text = ''
         self.card_pos_x = ""
         self.card_pos_y = ""
         self.alive = True
 
         # standby=行動前,active=行動中(原則一人),acted=行動済
 
-    def on_alive(self, instance, bool):
-        if bool:
+    def on_alive(self, instance, boolean: bool):
+        if boolean:
             Clock.schedule_interval(self.particle_animation, 2)
 
-        elif bool is False:
+        elif boolean is False:
             Clock.unschedule(self.particle_animation)
 
-    def on_is_active(self, instance, str: str):
+    def on_is_active(self, instance, word: str):
         """
         :param instance:
         :param str: activeステータス(standby,active,acted)がある。
         :return: (standby=未選択状態なら)select_artを初期化
         """
-        if str != "ACTIVE" and str != "ACTED":
+        if word is "STANDBY":
             self.select_art = ""
+        elif word is "DOWN":
+            self.selected_art.text = ""
 
-    def particle_animation(self, dt: object):
+    def particle_animation(self, dt:object):
         prt = self.particle
         anime = Animation(part_x=40, part_y=40)
         anime.bind(on_complete=self.part_reset)
@@ -435,7 +437,7 @@ class EnemyCard(SuperCard):
     def enemy_select(self):
         pppc = self.parent.parent.parent.children[0]
         if hasattr(pppc.select_hero_card, "select_art") and hasattr(pppc.select_hero_card.select_art, "target_type"):
-            if pppc.select_hero_card.select_art.target_type == "enemy" and pppc.select_hero_card.select_art is not None:
+            if pppc.select_hero_card.select_art.target_type == "VISITOR" and pppc.select_hero_card.select_art is not None:
                 return self.enemy_selected()
 
     def enemy_selected(self, ):
