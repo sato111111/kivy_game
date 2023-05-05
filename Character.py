@@ -1,12 +1,11 @@
 import math
 from dictionaries import *
-
 class Character:
     """キャラクター"""
-
+    sql = Sqlite()
     def __init__(self, characters_no: int):
         self.IS_TYPE = None
-        chara = characters_dict_list[characters_no]
+        chara =self.sql.chara_access()
         self.no = chara["no"]
         self.name = chara["name"]
         self.maxhp = chara["hp"]

@@ -272,6 +272,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
             if pc2c.is_active != "DOWN" and pc2c.is_active != "EMPTY":
                 pc2c.is_active = "STANDBY"
+                pc2c.is_active = "STANDBY"
                 pc2c.selected_art.text = ''
         self.order_list_update()
         self.acted_list = []
@@ -350,7 +351,7 @@ class HeroCard(SuperCard):
     def on_is_active(self, instance, word: str):
         """
         :param instance:
-        :param str: activeステータス(standby,active,acted)がある。
+        :param str: activeステータス(STANDBY,ACTIVE,ACTED,EMPTY)がある。
         :return: (standby=未選択状態なら)select_artを初期化
         """
         if word is "STANDBY":
@@ -442,7 +443,6 @@ class EnemyCard(SuperCard):
 
     def enemy_selected(self, ):
         """
-
 
         :return:
         """

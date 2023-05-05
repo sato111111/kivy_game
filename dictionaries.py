@@ -1,8 +1,10 @@
 # """key: [スキル名,スキルテキスト,ターゲット類(0=未分類、1=自分,2=味方単体,3=味方全体,4=敵単体,5=敵全体)
 #   ,コスト(1~5),攻撃属性,攻撃倍率(1.0 ~ 3.0),スキルレベル(1),ATKの影響(0.00 ~ 1.00),SPDの影響(0.00 ~ 1.00),テキスト]
 #          ATKの影響とSPDの影響は合計して1.00になるようにする。"""
+import sqlite3
 
-arts_dict_list = [
+
+__A_arts_dict_list = [
     {"no": 0, "name": "------", "target_type": "-------", "cost": 0, "attribute": "none", "damage_rate": 0,
      "skill_level": 0, "atk_impact": 0, "spd_impact": 0, "text": "------"},
 
@@ -39,7 +41,8 @@ armors_dict_list = [
     # {"no": 3, "name": "ナイフ", "pro": 5, "text": "(未実装)", },
 
 ]
-characters_dict_list = [
+
+__A_characters_dict_list = [
             #key: [名前,HP(50~250),ATK(0~20),SPD(0~20)]
     {"no": 0, "name": "------", "hp": 0, "atk": 0,"pro":0, "spd": 0, "text": "------"},
 
@@ -57,5 +60,58 @@ characters_dict_list = [
     {"no": 99, "name": "テストキャラ", "hp": 250, "atk": 20, "pro":20,"spd": 20, "text": "テスト用キャラ"},
 
 ]
+class Sqlite:
+    characters_dict_list = []
+    arts_dict_list = []
+    def __init__(self):
+        self.dbname = 'characters.db'
+        self.characters_dict_list=self.characters_dict_list_generate()
+        self.arts_dict_list=self.arts_dict_list_generate()
+
+    def characters_dict_list_generate(self,):
+        conn = sqlite3.connect(self.dbname)
+        __chara_list=[]
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM character')
+        for row in cur:
+            chara={}
+            chara["id"] = row[0]
+            chara["name"] = row[1]
+            chara["hp"] = row[2]
+            chara["atk"] = row[3]
+            chara["pro"] = row[4]
+            chara["spd"] = row[5]
+            chara["text"] = row[6]
+            __chara_list.append(chara)
 
 
+
+        conn.close()
+        return __chara_list
+    def arts_dict_list_generate(self):
+       # {"id": 0, "name": "------", "target_type": "-------", "cost": 0, "attribute": "none", "damage_rate": 0,
+        # "level": 0, "atk_impact": 0, "spd_impact": 0, "text": "------"},
+
+        conn = sqlite3.connect(self.dbname)
+        cur = conn.cursor()
+
+        arts_list = []
+
+        cur.execute('SELECT * FROM martial_art')
+        for row in cur:
+            art={}
+            art["id"]=row[0]
+            art["name"]=row[1]
+            art["target_type"]=row[2]
+            art["cost"]=row[3]
+            art["attribute"]=row[4]
+            art["damage_rate"]=row[5]
+            art["level"]=row[6]
+            art["atk_impact"]=row[7]
+            art["spd_impact"]=row[8]
+            art["text"]=row[9]
+
+            arts_list.append(art)
+
+        conn.close()
+        return arts_list

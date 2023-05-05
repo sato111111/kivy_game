@@ -1,5 +1,5 @@
 from operator import attrgetter
-
+import sqlite3
 import japanize_kivy  # import するだけで機能する。
 from kivy.animation import Animation
 from kivy.app import App
