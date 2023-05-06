@@ -1,18 +1,22 @@
 import math
-from dictionaries import *
+from Database import Database
+
+
 class Character:
     """キャラクター"""
-    sql = Sqlite()
+    sqlite = Database()
+    characters = sqlite.characters_dict_list_generate()
+
     def __init__(self, characters_no: int):
         self.IS_TYPE = None
-        chara =self.sql.chara_access()
-        self.no = chara["no"]
-        self.name = chara["name"]
-        self.maxhp = chara["hp"]
+        character = self.characters[characters_no]
+        self.no = character["id"]
+        self.name = character["name"]
+        self.maxhp = character["hp"]
         self.hp = self.maxhp
-        self.atk = chara["atk"]
-        self.pro = chara["pro"]
-        self.spd = chara["spd"]
+        self.atk = character["atk"]
+        self.pro = character["pro"]
+        self.spd = character["spd"]
 
         self.art1 = MartialArt(-1)
         self.art2 = MartialArt(2)
@@ -45,13 +49,14 @@ class Character:
 
 
 class MartialArt:
-    arts = arts_dict_list
+    sqlite = Database()
+    arts = sqlite.arts_dict_list_generate()
 
     def __init__(self, arts_no: int):
         # 技名
         art = self.arts[arts_no]
 
-        self.no = art["no"]
+        self.no = art["id"]
         self.name = art["name"]
         self.target_type = art["target_type"]
         # 技コスト
@@ -60,7 +65,7 @@ class MartialArt:
         # 攻撃倍率（計算時に使用）
         self.damage_rate = art["damage_rate"]
         # スキルレベル（計算時に使用）
-        self.skill_level = art["skill_level"]
+        self.skill_level = art["level"]
         # ダメージ計算用(ATK参照)
         self.atk_impact = art["atk_impact"]
         # ダメージ計算用(SPD参照)
@@ -69,7 +74,7 @@ class MartialArt:
         self.text = art["text"]
 
     def normal_attack(self):
-        damage = (self.damage_rate * (self.atk_impact+self.spd_impact))*10
+        damage = (self.damage_rate * (self.atk_impact + self.spd_impact)) * 10
         return damage
 
     def power_attack(self, target):
@@ -85,24 +90,26 @@ class MartialArt:
 
 
 class Weapon:
-    weapons = weapons_dict_list
+    sqlite = Database()
+    weapons = sqlite.weapons_dict_list_generate()
 
     def __init__(self, weapons_no: int):
         weapon = self.weapons[weapons_no]
 
-        self.no = weapon["no"]
+        self.no = weapon["id"]
         self.name = weapon["name"]
         self.atk = weapon["atk"]
         self.text = weapon["text"]
 
 
 class Armor:
-    armors = armors_dict_list
+    sqlite = Database()
+    armors = sqlite.armors_dict_list_generate()
 
     def __init__(self, armors_no: int):
         armor = self.armors[armors_no]
 
-        self.no = armor["no"]
+        self.no = armor["id"]
         self.name = armor["name"]
         self.pro = armor["pro"]
         self.text = armor["text"]
@@ -114,13 +121,12 @@ class Hero(Character):
         super().__init__(characters_no)
         self.IS_TYPE = "HERO"
 
+
 class Enemy(Character):
 
     def __init__(self, characters_no: int):
         super().__init__(characters_no)
         self.IS_TYPE = "ENEMY"
-        self.is_pos = []
-
 
 class Empty:
     def __init__(self):

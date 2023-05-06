@@ -1,5 +1,4 @@
 from operator import attrgetter
-import sqlite3
 import japanize_kivy  # import するだけで機能する。
 from kivy.animation import Animation
 from kivy.app import App
@@ -23,7 +22,7 @@ from Character import Enemy as En
 from time import sleep
 from sounds.Sounds import Sounds as Se
 from Battle import Battle
-import dictionaries as di
+import Database as di
 
 a = """def my_decorator(func):
     def wrapper(*args, **kwargs):
@@ -58,27 +57,28 @@ class SettingScreen(Screen):
         self.parent.current = self.before_screen
 
 
+class SuperLayout(GridLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    def change_screen(self, screen_name: str):
+        self.parent.manager.transition = WipeTransition()
+        self.parent.manager.current = screen_name
+    def change_setting_screen(self, ):
+        self.parent.manager.change_setting(self.current_screen_name)
+
 class SuperTopLayout(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
     def top_update_text_label(self, dt):
         self.text_label.text = self.txt_lbl
 
     def top_update_top_label(self, dt):
         self.top_label.text = self.top_lbl
 
-    def change_screen(self, screen_name: str):
-        self.parent.manager.transition = WipeTransition()
-        self.parent.manager.current = screen_name
-
-    def change_setting_screen(self, ):
-        self.parent.manager.change_setting_screen(self.current_screen_name)
 
 
 class SuperButtonLayout(GridLayout):
     """MainWidget,BattleWidget専用の継承クラス"""
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.se = Se()
@@ -123,6 +123,7 @@ class SuperCard(ButtonBehavior, BoxLayout):
         self.hp_bar.max = self.chara.maxhp
         self.hp_bar.now = self.chara.hp
         self.hp_bar.text = f"HP:{int(self.hp)}/{self.chara.maxhp}"
+
     def on_hp(self, instance, value):
         if self.hp == 0:
             self.is_active = "DOWN"
@@ -138,13 +139,11 @@ class SuperCard(ButtonBehavior, BoxLayout):
                 self.chara.hp = self.hp
                 Clock.schedule_interval(self.update_hp_bar, 0.01)
 
-
-
     def update_hp_bar(self, dt):
         if self.hp == self.hp_bar.now:
             Clock.unschedule(self.update_hp_bar)
             return self.parent.party_hp_checker()
-    
+
         if self.hp_bar.now > self.hp:
             self.hp_bar.now -= 1
         elif self.hp_bar.now < self.hp:

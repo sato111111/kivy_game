@@ -115,9 +115,7 @@ class BattleTest:
         next_turn_list = []
 
         [next_turn_list.append(f.name) if f.hp > 0 else down_list.append(f) for f in self.characters]
-        print(next_turn_list)
 
-        print([f.name +"//"+ str(f.hp) +"//"+str(f.spd) for f in self.spd_sort(down_list)])
 
     def test_attack(self):
         turn = "a"

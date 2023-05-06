@@ -1,7 +1,11 @@
 import random
+
+from kivy.uix.tabbedpanel import TabbedPanel
+
 import debug
 from kivy.graphics import Line
 
+import Database
 from supers import *
 
 # 指定したkvファイル読み込み
@@ -18,7 +22,6 @@ class KiApp(App):
         Window.size = (720, 1280)
         self.title = ''
         self.icon = "image/icon.png"
-
         he = [
             He(-1),
             He(-1),
@@ -68,9 +71,9 @@ class RootScreenManager(ScreenManager):
         self.__create__()
 
     def __create__(self):
-        btl = BattleTopLayout()
+        btl = BattleLayout()
         bbl = BattleButtonLayout()
-        mtl = MainTopLayout()
+        ml = MainLayout()
 
         self.add_widget(BattleScreen(name=self.__bs__))
         self.children[0].add_widget(btl)
@@ -78,37 +81,44 @@ class RootScreenManager(ScreenManager):
 
         self.add_widget(MainScreen(name=self.__ms__))
         self.current = self.__ms__
-        self.children[0].add_widget(mtl)
+        self.children[0].add_widget(ml)
         self.add_widget(SettingScreen(name=self.__ss__))
 
-    def change_setting_screen(self, current_screen_name: str):
+    def change_setting(self, current_screen_name: str):
         self.transition = WipeTransition()
         self.current = self.__ss__
         self.current_screen.before_screen = current_screen_name
 
 
-class MainTopLayout(SuperTopLayout):
-    def __init__(self, tplbl="", **kwargs):
+class MainTabPanel(TabbedPanel):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.top_label.text = tplbl if tplbl != "" else "ゲームスタート"
+
+
+class MainLayout(SuperLayout):
+    def __init__(self, tplbl="",**kwargs):
+        super().__init__(**kwargs)
+        self.main_top_layout.top_label.text = tplbl if tplbl != "" else "ゲームスタート"
         self.current_screen_name = "main_screen"
-
-    def top_menu_btn(self):
-        self.reset()
-
-    def reset(self):
-        self.clear_widgets()
-        self.parent.add_widget(MainTopLayout("リセットしました"))
-
     def battle_start(self):
         self.change_screen("battle_screen")
-
+    def top_menu_btn(self):
+        self.reset()
+    def reset(self):
+        self.clear_widgets()
+        self.remove_widget(self)
+        self.parent.add_widget(MainLayout("リセットしました"))
     def menu_btn(self):
         # setting_screen呼び出し
         self.change_setting_screen()
 
 
-class BattleTopLayout(SuperTopLayout):
+class MainTopLayout(SuperTopLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class BattleLayout(SuperLayout):
     def __init__(self, tplbl="", **kwargs):
         super().__init__(**kwargs)
         self.top_label.text = tplbl if tplbl != "" else "ゲームスタート"
@@ -131,7 +141,7 @@ class BattleTopLayout(SuperTopLayout):
         self.parent.manager.current = "main_screen"
         self.clear_widgets()
         self.remove_widget(self)
-        self.parent.add_widget(BattleTopLayout("リセットしました"))
+        self.parent.add_widget(BattleLayout("リセットしました"))
         self.parent.children[0].add_widget(BattleButtonLayout())
 
     def menu_btn(self):  # 機能的凝集、スタンプ結合
@@ -205,7 +215,6 @@ class BattleButtonLayout(SuperButtonLayout):
             self.card_insert()
             self.order_list_insert()
             self.turn_start()
-
 
         elif t == "戦闘実行(本番)":
             pass
@@ -359,7 +368,7 @@ class HeroCard(SuperCard):
         elif word is "DOWN":
             self.selected_art.text = ""
 
-    def particle_animation(self, dt:object):
+    def particle_animation(self, dt: object):
         prt = self.particle
         anime = Animation(part_x=40, part_y=40)
         anime.bind(on_complete=self.part_reset)
@@ -449,7 +458,6 @@ class EnemyCard(SuperCard):
         ppc = self.parent.parent.children[0]
         pppc = self.parent.parent.parent.children[0]
         empty = ""
-        print(self.chara.name)
         for i in range(G_PARTY_MEMBER_MAX):
             hc = ppc.children[i]
             if hc.is_active is "ACTIVE":
