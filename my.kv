@@ -119,9 +119,12 @@
                 current_party:current_party
                 have_character:have_character
                 GridLayout:
+                    padding:10
+                    spacing:10
+
+                    size_hint:1,.35
                     id:current_party
                     rows:1
-
                 GridLayout:
                     id:have_character
                     rows:3
@@ -130,8 +133,15 @@
         TabbedPanelItem:
             text:'ガチャ'
             GatyaLayout:
+
                 do_scroll_x:False
                 GridLayout:
+                    canvas.before:
+                        Color:
+                            rgb: .1, .3, .3
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
                     cols:1
                     #size_hint_x:None
@@ -164,7 +174,14 @@
     atk:atk
     pro:pro
     spd:spd
+    canvas.before:
+        Color:
+            rgb: .1, .3, .3
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
+
         Cstmlbl_fs15:
             text:"画像スペース"
     GridLayout:
