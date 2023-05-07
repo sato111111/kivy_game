@@ -106,7 +106,7 @@ class SuperButtonLayout(GridLayout):
 
 class SuperCard(ButtonBehavior, BoxLayout):
     chara = ObjectProperty()
-    alive = BooleanProperty(None)
+    current_battle = BooleanProperty(None)
     hp = NumericProperty(None)
     own_target_no = NumericProperty(None)
     visitor_target_no = NumericProperty(None)

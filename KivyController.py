@@ -96,18 +96,22 @@ class MainTabPanel(TabbedPanel):
 
 
 class MainLayout(SuperLayout):
-    def __init__(self, tplbl="",**kwargs):
+    def __init__(self, tplbl="", **kwargs):
         super().__init__(**kwargs)
         self.main_top_layout.top_label.text = tplbl if tplbl != "" else "ゲームスタート"
         self.current_screen_name = "main_screen"
+
     def battle_start(self):
         self.change_screen("battle_screen")
+
     def top_menu_btn(self):
         self.reset()
+
     def reset(self):
         self.clear_widgets()
         self.remove_widget(self)
         self.parent.add_widget(MainLayout("リセットしました"))
+
     def menu_btn(self):
         # setting_screen呼び出し
         self.change_setting_screen()
@@ -290,8 +294,12 @@ class BattleButtonLayout(SuperButtonLayout):
         return self.turn_start()
 
     def battle_end(self):
+        # 必要あるのか要検討
         for i in range(G_PARTY_MEMBER_MAX):
-            self.parent.battle_field.heroes_field.children[i].alive = False
+            self.parent.battle_field.heroes_field.children[i].current_battle = False
+        # 戦闘前ステータス呼び出し
+        [h.load_current_state() for h in self.player.party]
+
         self.parent.reset()
 
     def target_select(self, ):
@@ -316,7 +324,7 @@ class BattleButtonLayout(SuperButtonLayout):
 
         """HeroFieldに(右側)にカードを挿入"""
         hero_full_pt = self.player.party + ["", ""]  # 先に空(empty)を挿入
-
+        [h.save_current_state() for h in self.player.party]
         [self.parent.battle_field.heroes_field.add_widget(h_in_widget) for h_in_widget in
          [HeroCard(h) if h != "" else EmptyCard() for h in hero_full_pt[0:G_PARTY_MEMBER_MAX]]]
 
@@ -346,11 +354,11 @@ class HeroCard(SuperCard):
         self.selected_art.text = ''
         self.card_pos_x = ""
         self.card_pos_y = ""
-        self.alive = True
+        self.current_battle = True
 
         # standby=行動前,active=行動中(原則一人),acted=行動済
 
-    def on_alive(self, instance, boolean: bool):
+    def on_current_battle(self, instance, boolean: bool):
         if boolean:
             Clock.schedule_interval(self.particle_animation, 2)
 
@@ -486,6 +494,36 @@ class EnemyCard(SuperCard):
 
         else:
             pass
+
+
+class PartyLayout(GridLayout):
+    global g_player
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        #self.clear_widgets()
+
+    def set_party(self):
+        self.current_party.clear_widgets()
+        for card in self.current_party.children:
+            self.remove_widget(card)
+        self.generate_card_list()
+
+    def generate_card_list(self):
+        party = [PartyCard(c) for c in g_player.party]
+        self.party = party
+        self.set_character_card()
+    def set_character_card(self):
+        for cpc in self.party:
+            self.current_party.add_widget(cpc)
+
+class PartyCard(ButtonBehavior, GridLayout):
+    def __init__(self, c, **kwargs):
+        super().__init__(**kwargs)
+        self.name.text = c.name
+        self.hp.text = str(c.hp)
+        self.atk.text = str(c.atk)
+        self.pro.text = str(c.pro)
+        self.spd.text = str(c.spd)
 
 
 class BattleField(BoxLayout):

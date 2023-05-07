@@ -120,7 +120,16 @@ class Hero(Character):
     def __init__(self, characters_no: int):
         super().__init__(characters_no)
         self.IS_TYPE = "HERO"
+    def save_current_state(self):
+        self.current_atk = self.atk
+        self.current_pro = self.pro
+        self.current_spd = self.spd
 
+    def load_current_state(self):
+        self.hp = self.maxhp
+        self.atk = self.current_atk
+        self.pro = self.current_pro
+        self.spd = self.current_spd
 
 class Enemy(Character):
 

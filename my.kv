@@ -84,6 +84,7 @@
 
     MainTabPanel:
         tab_width:self.width/4
+        #tab_pos:'bottom_left'
         TabbedPanelItem:
             text:' 戦闘'
 #######################################children[1]
@@ -109,12 +110,81 @@
             ######################################children[4]
 
         TabbedPanelItem:
-            text:'ガチャ'
-        TabbedPanelItem:
-            text:''
-        TabbedPanelItem:
-            text:''
+            party_layout:party_layout
+            on_release:party_layout.set_party()
 
+            text:'パーティ'
+            PartyLayout:
+                id:party_layout
+                current_party:current_party
+                have_character:have_character
+                GridLayout:
+                    id:current_party
+                    rows:1
+
+                GridLayout:
+                    id:have_character
+                    rows:3
+            ############################################################################children[]
+
+        TabbedPanelItem:
+            text:'ガチャ'
+            GatyaLayout:
+                do_scroll_x:False
+                GridLayout:
+
+                    cols:1
+                    #size_hint_x:None
+                    size_hint_y:None
+                    #col_default_widht:root.width
+                    row_default_height: root.height/2
+                    #width:self.minimum_width
+                    height: self.minimum_height
+                    GridLayout:
+                        cols:2
+                        padding:10
+                        Cstmlbl_fs15:
+                            text:'テスト'
+
+                        MenuButton:
+                            size_hint:1,1
+                            text:'ガチャを回す'
+                            on_release:root.gatya_start()
+            ############################################################################children[]
+
+        TabbedPanelItem:
+            text:'プレイヤー'
+<PartyLayout>:
+    cols:1
+
+<PartyCard>:
+    cols:2
+    name:name
+    hp:hp
+    atk:atk
+    pro:pro
+    spd:spd
+    BoxLayout:
+        Cstmlbl_fs15:
+            text:"画像スペース"
+    GridLayout:
+        cols:1
+        Cstmlbl_fs15:
+            id:name
+            text:'name'
+        Cstmlbl_fs15:
+            id:hp
+            text:'hp'
+        Cstmlbl_fs15:
+            id:atk
+            text:'atk'
+        Cstmlbl_fs15:
+            id:pro
+            text:'pro'
+        Cstmlbl_fs15:
+            id:spd
+            text:'spd'
+<GatyaLayout@ScrollView>:
 <MainTopLayout>: ####parent
 <aaaa>:
     id:main_top_layout
