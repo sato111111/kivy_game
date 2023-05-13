@@ -1,16 +1,16 @@
 import sqlite3
 
 class Database:
+    dbname = 'db/character.db'
     def __init__(self):
-        self.dbname = 'db/characters.db'
-
+        pass
     def characters_dict_list_generate(self, ):
         # """key: [スキル名,スキルテキスト,ターゲット類(0=未分類、1=自分,2=味方単体,3=味方全体,4=敵単体,5=敵全体)
         #   ,コスト(1~5),攻撃属性,攻撃倍率(1.0 ~ 3.0),スキルレベル(1),ATKの影響(0.00 ~ 1.00),SPDの影響(0.00 ~ 1.00),テキスト]
         #          ATKの影響とSPDの影響は合計して1.00になるようにする。"""
         conn = sqlite3.connect(self.dbname)
         cur = conn.cursor()
-        cur.execute('SELECT * FROM character')
+        cur.execute('SELECT * FROM Character')
         __list__ = []
         for row in cur:
             dic = {
@@ -21,6 +21,7 @@ class Database:
                 "pro": row[4],
                 "spd": row[5],
                 "text": row[6],
+                "RARE": row[7],
             }
             __list__.append(dic)
         conn.close()
@@ -32,7 +33,7 @@ class Database:
 
         conn = sqlite3.connect(self.dbname)
         cur = conn.cursor()
-        cur.execute('SELECT * FROM martial_art')
+        cur.execute('SELECT * FROM MartialArt')
         __list__ = []
         for row in cur:
             dic = {
@@ -56,7 +57,7 @@ class Database:
     def weapons_dict_list_generate(self, ):
         conn = sqlite3.connect(self.dbname)
         cur = conn.cursor()
-        cur.execute('SELECT * FROM weapon')
+        cur.execute('SELECT * FROM Weapon')
         __list__ = []
         for row in cur:
             dic = {
@@ -73,7 +74,7 @@ class Database:
     def armors_dict_list_generate(self, ):
         conn = sqlite3.connect(self.dbname)
         cur = conn.cursor()
-        cur.execute('SELECT * FROM armor')
+        cur.execute('SELECT * FROM Armor')
         __list__ = []
         for row in cur:
             dic = {

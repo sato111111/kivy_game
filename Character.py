@@ -17,6 +17,7 @@ class Character:
         self.atk = character["atk"]
         self.pro = character["pro"]
         self.spd = character["spd"]
+        self.RARE = character["RARE"]
 
         self.art1 = MartialArt(-1)
         self.art2 = MartialArt(2)
@@ -87,8 +88,6 @@ class MartialArt:
         dam = self.dam_atk + self.dam_spd
         target.hp -= dam
         return dam
-
-
 class Weapon:
     sqlite = Database()
     weapons = sqlite.weapons_dict_list_generate()

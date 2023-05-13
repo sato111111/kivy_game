@@ -1,10 +1,10 @@
 import random
 
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.tabbedpanel import TabbedPanel
 
 import debug
 from kivy.graphics import Line
-
 import Database
 from supers import *
 
@@ -13,7 +13,6 @@ from supers import *
 
 global g_player
 global g_battle_party
-
 
 class KiApp(App):
     def build(self):
@@ -530,3 +529,9 @@ class BattleField(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # 行動をここに格納し、行動時はここから呼び出す。
+class GatyaLayout(ScrollView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+
