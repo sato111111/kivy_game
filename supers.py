@@ -12,7 +12,7 @@ from kivy.uix.screenmanager import Screen, ScreenManager, WipeTransition
 from kivy.core.window import Window
 from kivy.config import Config
 from kivy.uix.widget import Widget
-
+from Debug import Debug as Dbg
 from kivy.uix.popup import Popup
 from Player import Player as Pl
 from Character import Character as Ch, Empty
@@ -22,6 +22,7 @@ from Character import Enemy as En
 from time import sleep
 from sounds.Sounds import Sounds as Se
 from Battle import Battle
+from Gacha import Gacha as GC
 import Database as di
 
 a = """def my_decorator(func):

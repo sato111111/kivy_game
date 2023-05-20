@@ -3,7 +3,6 @@ import random
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.tabbedpanel import TabbedPanel
 
-import debug
 from kivy.graphics import Line
 import Database
 from supers import *
@@ -161,6 +160,8 @@ class BattleButtonLayout(SuperButtonLayout):
     turn_end_call_count = NumericProperty(0)
     select_hero_card = ObjectProperty("")
 
+
+    dbg=Dbg()
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -170,7 +171,7 @@ class BattleButtonLayout(SuperButtonLayout):
         self.max_ac_count = 0
         self.acted_list = []
         self.sorted_acted_lst = []
-        self.enemy_party = debug.enemies_generate(En)
+        self.enemy_party = self.dbg.enemies_generate(En)
         self.DEBUG_BTN()
 
     def on_turn_end_call_count(self, instance, value):
@@ -529,9 +530,19 @@ class BattleField(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # 行動をここに格納し、行動時はここから呼び出す。
-class GatyaLayout(ScrollView):
+class GachaLayout(ScrollView):
+    dbg = Dbg()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def gacha_start(self):
+        gc = GC()
+        result = gc.run_continue_10()
+        print(result)
+        return result
+
+
 
 
 

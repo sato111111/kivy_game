@@ -132,8 +132,8 @@
 
         TabbedPanelItem:
             text:'ガチャ'
-            GatyaLayout:
-
+            GachaLayout:
+                id:gacha_layout
                 do_scroll_x:False
                 GridLayout:
                     canvas.before:
@@ -159,7 +159,7 @@
                         MenuButton:
                             size_hint:1,1
                             text:'ガチャを回す'
-                            on_release:root.gatya_start()
+                            on_release:gacha_layout.gacha_start()
             ############################################################################children[]
 
         TabbedPanelItem:
@@ -201,7 +201,7 @@
         Cstmlbl_fs15:
             id:spd
             text:'spd'
-<GatyaLayout>:
+<GachaLayout>:
 <MainTopLayout>: ####parent
 <aaaa>:
     id:main_top_layout
