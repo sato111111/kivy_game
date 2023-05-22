@@ -15,7 +15,7 @@ from kivy.uix.widget import Widget
 from Debug import Debug as Dbg
 from kivy.uix.popup import Popup
 from Player import Player as Pl
-from Character import Character as Ch, Empty
+from Character import Character as Ch
 from Character import Hero as He
 from Character import Enemy as En
 

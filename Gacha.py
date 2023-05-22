@@ -1,3 +1,4 @@
+from Database import Database
 import random
 
 from Character import Character as c
@@ -29,8 +30,6 @@ class Gacha:
         {'list':RARE2_LIST,'rate':0.7},     #0.7  ~ 0.4 +   2.5
         {'list':RARE1_LIST,'rate':1.0},     #1.0  ~ 0.7 +   3
     ]
-    def __init__(self):
-        pass
     def generate(self):
         """排出の実行"""
         rand = random.random()  #レア度レートを定義
@@ -41,12 +40,14 @@ class Gacha:
                 #print(f'{gacha_c["list"][0].name},{gacha_c["list"][0].RARE}')
                 return gacha_c["list"][0] #シャッフルしたリストから1番目をreturn
 
-    def run_continue_10(self):
-        MAX_GATYA = 10
-        result = []
+    def run_continue_10(self,player):
+        MAX_GACHA = 10
 
-        for _ in range(MAX_GATYA):
-            result.append(self.generate())    #メソッドからreturnされたキャラをresultに挿入
+        result = [self.generate() for _ in range(MAX_GACHA)]
+
+        player.set_have_player_character(result)
+
         return result
+
     def double_checker(self):
         global PLAYER_INFO

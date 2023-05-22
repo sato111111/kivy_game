@@ -20,17 +20,10 @@ class KiApp(App):
         Window.size = (720, 1280)
         self.title = ''
         self.icon = "image/icon.png"
-        he = [
-            He(-1),
-            He(-1),
-            He(-1)
-        ]
+
 
         global g_player
-        g_player = Pl(
-            #"テストプレイヤー",
-            player_party = he,
-        )
+        g_player = Pl()
 
         return self.env_execute()
 
@@ -503,24 +496,22 @@ class EnemyCard(SuperCard):
 
 class PartyLayout(GridLayout):
     global g_player
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        #self.clear_widgets()
-
     def set_party(self):
         self.current_party.clear_widgets()
+        self.have_character.clear_widgets()
         for card in self.current_party.children:
             self.remove_widget(card)
-        self.generate_card_list()
+        for card in self.have_character.children:
+            self.remove_widget(card)
 
-    def generate_card_list(self):
-        party = [PartyCard(c) for c in g_player.party]
-        self.party = party
-        self.set_character_card()
-    def set_character_card(self):
-        for cpc in self.party:
-            self.current_party.add_widget(cpc)
+        self.set_current_party_card()
+        self.get_have_character()
 
+    def set_current_party_card(self):
+        [self.current_party.add_widget(current_party_hero) for current_party_hero in [PartyCard(c) for c in g_player.party]]
+
+    def get_have_character(self):
+        [self.have_character.add_widget(hero) for hero in [PartyCard(He(c["character_number"])) for c in g_player.get_have_hero()]]
 class PartyCard(ButtonBehavior, GridLayout):
     def __init__(self, c, **kwargs):
         super().__init__(**kwargs)
@@ -547,21 +538,18 @@ class GachaLayout(ScrollView):
 
 
 class GachaResultLayout(SuperLayout):
+    global g_player
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
         self.gacha_start()
 
+    def gacha_start(self):
+        gc = GC()
+        [self.result_space.add_widget(GachaCard(chara)) for chara in gc.run_continue_10(g_player)]
+
     def main_slide(self):
         p = self.parent.manager
-        #p.manager.current="main_screen"
         self.clear_widgets()
         self.remove_widget(self)
         p.transition = WipeTransition()
         p.current = "main_screen"
-
-    def gacha_start(self):
-        gc = GC()
-        result = gc.run_continue_10()
-        for chara in result:
-            self.result_space.add_widget(GachaCard(chara))
-

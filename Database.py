@@ -1,22 +1,64 @@
 import sqlite3
 
-class Database:
-    chara_db = 'db/character.db'
-    player_info_db = 'db/player_info.db'
 
-    def get_player_info(self,):
+class Database:
+    player_info_db = 'db/player_info.db'
+    chara_db = 'db/character.db'
+
+    def get_player_info(self, ):
         conn = sqlite3.connect(self.player_info_db)
         cur = conn.cursor()
         cur.execute('SELECT * FROM PlayerInfoData')
-        dic = {}
         for row in cur:
             dic = {
-                "name": row[0],
-                "time": row[1],
+                "id": row[0],
+                "name": row[1],
+                "cost": row[2],
+                "list_limit": row[3],
+                "play_time": row[4],
+                "year": row[5],
+                "month": row[6],
+                "day": row[7],
             }
 
         conn.close()
         return dic
+
+    def get_player_party(self):
+        conn = sqlite3.connect(self.player_info_db)
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM PlayerParty')
+        __list__ = []
+        for row in cur:
+            dic = {
+                "id": row[0],
+                "character_number": row[1],
+            }
+            __list__.append(dic)
+        conn.close()
+        return __list__
+
+    def get_have_player_character(self):
+        conn = sqlite3.connect(self.player_info_db)
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM HaveCharacterList')
+        __list__ = []
+        for row in cur:
+            dic = {
+                "id": row[0],
+                "character_number": row[1],
+            }
+            __list__.append(dic)
+        conn.close()
+        return __list__
+
+    def set_have_player_character(self, result):
+        conn = sqlite3.connect(self.player_info_db)
+        cur = conn.cursor()
+        for chara in result:
+            cur.execute('INSERT INTO HaveCharacterList (CharacterNumber) VALUES (?)', (chara.no,))
+        conn.commit()
+        conn.close()
 
     def characters_dict_list_generate(self, ):
         # """key: [スキル名,スキルテキスト,ターゲット類(0=未分類、1=自分,2=味方単体,3=味方全体,4=敵単体,5=敵全体)
