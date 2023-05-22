@@ -521,7 +521,6 @@ class PartyCard(ButtonBehavior, GridLayout):
         self.pro.text = str(c.pro)
         self.spd.text = str(c.spd)
 
-
 class BattleField(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

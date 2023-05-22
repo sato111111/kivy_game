@@ -124,12 +124,17 @@
                     spacing:10
                     size_hint:1,.35
                     id:current_party
-                GridLayout:
-                    rows:5
-                    padding:10
-                    spacing:10
+                ScrollView:
                     size_hint:1,.65
-                    id:have_character
+                    do_scroll_x:False
+                    GridLayout:
+                        size_hint_y:None
+                        row_default_height: self.width/6
+                        height: self.minimum_height
+                        cols:6
+                        padding:20
+                        spacing:20
+                        id:have_character
             ############################################################################children[]
 
         TabbedPanelItem:
