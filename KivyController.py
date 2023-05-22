@@ -27,7 +27,10 @@ class KiApp(App):
         ]
 
         global g_player
-        g_player = Pl("テストプレイヤー", he)
+        g_player = Pl(
+            #"テストプレイヤー",
+            player_party = he,
+        )
 
         return self.env_execute()
 
@@ -66,27 +69,30 @@ class RootScreenManager(ScreenManager):
         self.__ms__ = "main_screen"
         self.__bs__ = "battle_screen"
         self.__ss__ = "setting_screen"
+        self.__grs__ = "gacha_result_screen"
         self.__create__()
 
     def __create__(self):
         btl = BattleLayout()
         bbl = BattleButtonLayout()
         ml = MainLayout()
-
         self.add_widget(BattleScreen(name=self.__bs__))
         self.children[0].add_widget(btl)
         self.children[0].children[0].add_widget(bbl)
-
+        self.add_widget(GachaResultScreen(name=self.__grs__))
         self.add_widget(MainScreen(name=self.__ms__))
         self.current = self.__ms__
         self.children[0].add_widget(ml)
         self.add_widget(SettingScreen(name=self.__ss__))
-
     def change_setting(self, current_screen_name: str):
-        self.transition = WipeTransition()
         self.current = self.__ss__
         self.current_screen.before_screen = current_screen_name
+    def change_gacha_result_screen(self, ):
+        self.transition = WipeTransition()
+        self.current = self.__grs__
+        grl=GachaResultLayout()
 
+        self.current_screen.add_widget(grl)
 
 class MainTabPanel(TabbedPanel):
     def __init__(self, **kwargs):
@@ -284,7 +290,6 @@ class BattleButtonLayout(SuperButtonLayout):
             pc2c = self.parent.children[2].children[0].children[i]
 
             if pc2c.is_active != "DOWN" and pc2c.is_active != "EMPTY":
-                pc2c.is_active = "STANDBY"
                 pc2c.is_active = "STANDBY"
                 pc2c.selected_art.text = ''
         self.order_list_update()
@@ -536,13 +541,27 @@ class GachaLayout(ScrollView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def run_gacha(self):#change_gacha_result_screenを走らせる。
+        sppppm = self.parent.parent.parent.parent.manager
+        sppppm.change_gacha_result_screen()
+
+
+class GachaResultLayout(SuperLayout):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+        self.gacha_start()
+
+    def main_slide(self):
+        p = self.parent.manager
+        #p.manager.current="main_screen"
+        self.clear_widgets()
+        self.remove_widget(self)
+        p.transition = WipeTransition()
+        p.current = "main_screen"
+
     def gacha_start(self):
         gc = GC()
         result = gc.run_continue_10()
-        print(result)
-        return result
-
-
-
-
+        for chara in result:
+            self.result_space.add_widget(GachaCard(chara))
 

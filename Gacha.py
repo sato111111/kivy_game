@@ -48,3 +48,5 @@ class Gacha:
         for _ in range(MAX_GATYA):
             result.append(self.generate())    #メソッドからreturnされたキャラをresultに挿入
         return result
+    def double_checker(self):
+        global PLAYER_INFO

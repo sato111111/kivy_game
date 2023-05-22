@@ -26,7 +26,6 @@
 
 <MainTabPanel>:
     do_default_tab: False
-
 <MainLayout>:
     cols:1
     main_top_layout:main_top_layout
@@ -159,7 +158,7 @@
                         MenuButton:
                             size_hint:1,1
                             text:'ガチャを回す'
-                            on_release:gacha_layout.gacha_start()
+                            on_release:gacha_layout.run_gacha()
             ############################################################################children[]
 
         TabbedPanelItem:
@@ -202,6 +201,47 @@
             id:spd
             text:'spd'
 <GachaLayout>:
+<GachaResultScreen>:
+
+<GachaResultLayout>:
+    id:gacha_result_layout
+    cols:1
+    size_hint:1,1
+    result_space:result_space
+    GridLayout: #空きスペース
+        cols:1
+        size_hint:1,.05
+        Cstmlbl_fs15:
+            text:"ガチャ結果"
+    GridLayout:     #ガチャ表示スペース
+        cols:2
+        spacing:10
+        padding:10
+
+        id:result_space
+        size_hint:1,.8
+    GridLayout:     #ボタンスペース
+        spacing:30
+        padding:30
+        cols:1
+        size_hint:1,.15
+        MenuButton:
+            text:"閉じる"
+            on_release:root.main_slide()
+<GachaCard>:
+    cols:2
+    size_hint:1,1
+    name:name
+    GridLayout:
+        cols:1
+    GridLayout:
+        cols:1
+        Cstmlbl_fs15:
+            id:name
+            text:'name'
+
+
+
 <MainTopLayout>: ####parent
 <aaaa>:
     id:main_top_layout

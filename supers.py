@@ -42,6 +42,8 @@ class MainScreen(Screen):
 
 class BattleScreen(Screen):
     pass
+class GachaResultScreen(Screen):
+    pass
 
 
 class SettingScreen(Screen):
@@ -236,3 +238,9 @@ class EmptyCard(Widget):
 class PopupMenu(BoxLayout):
     popup_no = ObjectProperty(None)
     popup_yes = ObjectProperty(None)
+class GachaCard(ButtonBehavior,GridLayout):
+    def __init__(self, character,**kwargs):
+        super().__init__(**kwargs)
+        self.name.text =character.name_txt()
+
+
