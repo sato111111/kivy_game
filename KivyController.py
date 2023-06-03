@@ -13,6 +13,7 @@ from supers import *
 global g_player
 global g_battle_party
 
+
 class KiApp(App):
     def build(self):
         """ビルドされた時に1度だけ実行"""
@@ -20,7 +21,6 @@ class KiApp(App):
         Window.size = (720, 1280)
         self.title = ''
         self.icon = "image/icon.png"
-
 
         global g_player
         g_player = Pl()
@@ -66,26 +66,53 @@ class RootScreenManager(ScreenManager):
         self.__create__()
 
     def __create__(self):
-        btl = BattleLayout()
-        bbl = BattleButtonLayout()
-        ml = MainLayout()
-        self.add_widget(BattleScreen(name=self.__bs__))
-        self.children[0].add_widget(btl)
-        self.children[0].children[0].add_widget(bbl)
-        self.add_widget(GachaResultScreen(name=self.__grs__))
         self.add_widget(MainScreen(name=self.__ms__))
-        self.current = self.__ms__
-        self.children[0].add_widget(ml)
+        self.add_widget(BattleScreen(name=self.__bs__))
+        self.add_widget(GachaResultScreen(name=self.__grs__))
         self.add_widget(SettingScreen(name=self.__ss__))
+
     def change_setting(self, current_screen_name: str):
         self.current = self.__ss__
         self.current_screen.before_screen = current_screen_name
+
     def change_gacha_result_screen(self, ):
         self.transition = WipeTransition()
         self.current = self.__grs__
-        grl=GachaResultLayout()
+        grl = GachaResultLayout()
 
         self.current_screen.add_widget(grl)
+
+
+class BattleScreen(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+
+        self.genenarate_layout()
+
+        self.add_widget(self.btl)
+        self.children[0].add_widget(self.bbl)
+
+    def genenarate_layout(self):
+        self.btl = BattleLayout()
+        self.bbl = BattleButtonLayout()
+class GachaResultScreen(Screen):
+    pass
+
+class MainScreen(Screen):
+    def __init__(self, **kw):
+        super().__init__(**kw)
+
+        self.genenarate_layout()
+        self.add_widget(self.ml)
+
+
+    def genenarate_layout(self):
+        self.ml = MainLayout()
+
+
+
+class GachaResultScreen(Screen):
+    pass
 
 class MainTabPanel(TabbedPanel):
     def __init__(self, **kwargs):
@@ -159,8 +186,8 @@ class BattleButtonLayout(SuperButtonLayout):
     turn_end_call_count = NumericProperty(0)
     select_hero_card = ObjectProperty("")
 
+    dbg = Dbg()
 
-    dbg=Dbg()
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -496,22 +523,39 @@ class EnemyCard(SuperCard):
 
 class PartyLayout(GridLayout):
     global g_player
+    catch_character = NumericProperty()
+    catch_mini_character = NumericProperty()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.have_hero = g_player.get_have_hero()
+        self.player_party = g_player.party
+        self.is_reset = True
+
     def set_party(self):
+        if self.is_reset:
+            self.reset_widget()
+            self.is_reset = False
+
+    def reset_widget(self):
         self.current_party.clear_widgets()
+        [self.remove_widget(card) for card in self.current_party.children]
+
         self.have_character.clear_widgets()
-        for card in self.current_party.children:
-            self.remove_widget(card)
-        for card in self.have_character.children:
-            self.remove_widget(card)
+        [self.remove_widget(card) for card in self.have_character.children]
 
-        self.set_current_party_card()
-        self.get_have_character()
+        self.get_current_party_card()
+        self.get_have_character_card()
 
-    def set_current_party_card(self):
-        [self.current_party.add_widget(current_party_hero) for current_party_hero in [PartyCard(c) for c in g_player.party]]
+    def get_current_party_card(self):
+        [self.current_party.add_widget(current_party_hero) for current_party_hero in
+         [PartyCard(c) for c in self.player_party]]
 
-    def get_have_character(self):
-        [self.have_character.add_widget(hero) for hero in [PartyCard(He(c["character_number"])) for c in g_player.get_have_hero()]]
+    def get_have_character_card(self):
+        [self.have_character.add_widget(hero) for hero in
+         [MiniPartyCard(He(c["character_number"])) for c in self.have_hero]]
+
+
 class PartyCard(ButtonBehavior, GridLayout):
     def __init__(self, c, **kwargs):
         super().__init__(**kwargs)
@@ -521,24 +565,42 @@ class PartyCard(ButtonBehavior, GridLayout):
         self.pro.text = str(c.pro)
         self.spd.text = str(c.spd)
 
+
+class MiniPartyCard(ButtonBehavior, GridLayout):
+    def __init__(self, c, **kwargs):
+        super().__init__(**kwargs)
+        self.character = c
+        self.name.text = c.name
+        self.hp.text = str(c.hp)
+        self.atk.text = str(c.atk)
+        self.pro.text = str(c.pro)
+        self.spd.text = str(c.spd)
+
+    def select(self):
+        self.parent.catch_mini_character = self.character.no
+
+
 class BattleField(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # 行動をここに格納し、行動時はここから呼び出す。
+
+
 class GachaLayout(ScrollView):
     dbg = Dbg()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def run_gacha(self):#change_gacha_result_screenを走らせる。
+    def run_gacha(self):  # change_gacha_result_screenを走らせる。
         sppppm = self.parent.parent.parent.parent.manager
         sppppm.change_gacha_result_screen()
 
 
 class GachaResultLayout(SuperLayout):
     global g_player
-    def __init__(self,**kwargs):
+
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.gacha_start()
 

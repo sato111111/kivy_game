@@ -22,7 +22,6 @@ class Player:
     def set_have_player_character(self,result):
         self.db.set_have_player_character(result)
 
-
     def get_player_name(self):
         return "私の名前は " + self.name + "です。"
     def get_have_hero(self):

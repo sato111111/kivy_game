@@ -36,14 +36,6 @@ global G_PARTY_MEMBER_MAX
 G_PARTY_MEMBER_MAX = 3
 
 
-class MainScreen(Screen):
-    pass
-
-
-class BattleScreen(Screen):
-    pass
-class GachaResultScreen(Screen):
-    pass
 
 
 class SettingScreen(Screen):
